@@ -41,7 +41,7 @@ const Catalog = () => {
       <div className="text-center text-5xl font-bold mt-2 mb-10">
         <h2>Каталог</h2>
       </div>
-      <div className="flex flex-col xlg:flex-row flex-wrap justify-center items-center">
+      <div className="flex flex-col xlg:flex-row justify-center items-center">
         <div ref={leftRef} className="m-5">
           <Link href="/ovens">
             <CatalogItem title="Плити" src="/assets/images/ovens.jpg" />

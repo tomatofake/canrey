@@ -54,7 +54,7 @@ const Navigation = () => {
 
       <div className="lg:hidden">
         <button
-          className="w-8 h-6 relative z-50"
+          className="w-8 h-6 relative z-50 mt-2 mr-4"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           <span className={`absolute h-0.5 w-full bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 top-2.5' : 'top-0'}`}></span>

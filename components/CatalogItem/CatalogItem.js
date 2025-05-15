@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const CatalogItem = ({ title, src }) => {
   return (
-    <div className="relative bg-white flex h-[500px] w-full max-w-[570px] hover:scale-[1.01] transform-gpu transition-all overflow-hidden">
+    <div className="relative bg-white flex h-[500px] max-w-[500px] hover:scale-[1.01] transform-gpu transition-all">
       <Image
         src={src}
         alt={title}

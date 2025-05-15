@@ -12,7 +12,7 @@ const Footer = () => {
   return (
     <footer className="bg-black text-white px-5 py-10 md:px-10">
       <div className="flex flex-col xlg:flex-row justify-between gap-10 items-start xlg:items-end">
-        
+
         <div className="max-w-[600px]">
           <h2 className="text-xl md:text-2xl mb-6 leading-7">
             Зацікавлені у співробітництві, наших продуктах або виникли якісь питання? Зв'язатись з нами:
@@ -29,26 +29,27 @@ const Footer = () => {
           </div>
         </div>
 
-        <nav className="text-lg md:text-2xl w-full md:w-auto">
+        <nav className="text-xl xl:text-2xl w-full md:w-auto">
           <ul className="flex flex-col md:flex-row md:items-center gap-5 md:gap-10">
-            <li className="group">
+            <li className="group w-fit">
               <Link href='/'>Головна</Link>
               <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
             </li>
-            <li className="group cursor-pointer" onClick={() => setIsCatalogOpen(true)}>
+            <li className="group w-fit cursor-pointer" onClick={() => setIsCatalogOpen(true)}>
               <span>Каталог</span>
               <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
             </li>
-            <li className="group">
+            <li className="group w-fit">
               <Link href='/partners'>Наші партнери</Link>
               <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
             </li>
-            <li className="group">
+            <li className="group w-fit">
               <Link href='/about'>Про нас</Link>
               <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
             </li>
           </ul>
         </nav>
+
       </div>
 
       <div className="flex justify-center py-10">
@@ -60,6 +61,7 @@ const Footer = () => {
       </div>
 
       {isCatalogOpen && <CatalogOverlay onClose={() => setIsCatalogOpen(false)} />}
+
     </footer>
   );
 };
