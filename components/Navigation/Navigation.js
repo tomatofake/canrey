@@ -64,6 +64,7 @@ const Navigation = () => {
 
         <div
           ref={menuRef}
+          style={{ transform: 'translateX(100%)' }}
           className="fixed top-0 right-0 w-full h-full bg-black text-white z-40 flex flex-col items-center justify-center space-y-8 text-2xl"
         >
           <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>Головна</Link>

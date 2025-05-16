@@ -24,7 +24,7 @@ const EOvens = () => {
   <>
     <Header />
     <main className="min-h-[100vh] max-w-[1920px] mx-auto p-5 xl:px-8">
-      <div className="mb-4 flex flex-col xl:flex-row xl:items-center xl:gap-6">
+      <div className="mb-4 flex flex-col xlg:flex-row xlg:items-center xlg:gap-6">
         <div className="mb-2 xl:mb-0">
           <BackButton />
         </div>
@@ -40,8 +40,8 @@ const EOvens = () => {
           />
         </div>
 
-        <div className="w-full xl:w-5/6">
-          <div className="xl:hidden mb-4">
+        <div className="flex flex-col xlg:gap-8 xlg:flex-row xl:w-5/6">
+          <div className="xl:hidden">
             <ProductFilters
               products={products}
               onFilter={setFiltered}

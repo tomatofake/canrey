@@ -42,8 +42,8 @@ const GasConvectors = () => {
             />
           </div>
 
-          <div className="w-full xl:w-5/6">
-            <div className="xl:hidden mb-4">
+          <div className="flex flex-col xlg:gap-8 xlg:flex-row xl:w-5/6">
+            <div className="xl:hidden">
               <ProductFilters
                 products={products}
                 onFilter={setFiltered}

@@ -25,16 +25,15 @@ const Ovens = () => {
   return (
     <>
       <Header />
-      <main className="min-h-[100vh] max-w-[1920px] mx-auto p-5 xl:px-8">
-        <div className="mb-4 flex flex-col xl:flex-row xl:items-center xl:gap-6">
-          <div className="mb-2 xl:mb-0">
+      <main className="min-h-[100vh] max-w-[1920px] mx-auto p-5 xlg:px-8">
+        <div className="mb-4 flex flex-col xlg:flex-row xlg:items-center xlg:gap-6">
+          <div className="mb-2 xlg:mb-0">
             <BackButton />
           </div>
           <h1 className="text-4xl font-bold">Плити</h1>
         </div>
 
         <div className="xl:flex xl:gap-8">
-          {/* Бокова панель фільтрів на десктопі */}
           <div className="hidden xl:block">
             <ProductFilters
               products={products}
@@ -48,10 +47,8 @@ const Ovens = () => {
             />
           </div>
 
-          {/* Товари */}
-          <div className="w-full xl:w-5/6">
-            {/* Кнопка фільтрів на мобілці */}
-            <div className="xl:hidden mb-4">
+          <div className="flex flex-col xlg:gap-8 xlg:flex-row xl:w-5/6">
+            <div className="xl:hidden">
               <ProductFilters
                 products={products}
                 onFilter={setFiltered}
@@ -74,4 +71,3 @@ const Ovens = () => {
 };
 
 export default Ovens;
-

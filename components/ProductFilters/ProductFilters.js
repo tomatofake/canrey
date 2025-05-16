@@ -81,7 +81,7 @@ const ProductFilters = ({ products, onFilter, availableFilters = [] }) => {
 
   return (
     <>
-      <div className="hidden xl:flex gap-8">
+      <div className="hidden xlg:flex gap-8">
         <aside className="w-64 shrink-0 border p-4 rounded bg-white shadow">
           <h2 className="text-lg font-semibold mb-4">Фільтрувати за:</h2>
           {availableFilters.map((key) => (
@@ -105,7 +105,7 @@ const ProductFilters = ({ products, onFilter, availableFilters = [] }) => {
         </aside>
       </div>
 
-      <div className="xl:hidden mb-4">
+      <div className="xlg:hidden mb-4">
         <div className="flex items-center justify-between">
           <button
             onClick={() => setIsOpen(true)}

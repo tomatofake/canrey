@@ -52,7 +52,7 @@ const BrandSection = ({ imageSrc, imageAlt, children, reverse = false }) => {
     <section
       ref={sectionRef}
       className={clsx(
-        "max-w-[1920px] mx-auto px-4 md:px-6 xl:px-12 pb-20",
+        "max-w-[1600px] mx-auto px-4 md:px-10 pb-20",
         "flex flex-col lg:flex-row items-center gap-20 text-center lg:text-left",
         reverse && "lg:flex-row-reverse"
       )}
