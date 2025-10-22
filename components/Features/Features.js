@@ -4,7 +4,7 @@ const Features = () => {
   return (
     <section>
       <BrandSection imageSrc="/assets/images/br1.jpg" imageAlt="SuperTech">
-        <p className="md:text-5xl sm:text-3xl text-3xl xlg:text-left sm:text-center md:leading-normal">
+        <p className="md:text-5xl sm:text-3xl text-3xl text-primary xlg:text-left sm:text-center md:leading-normal">
           Висока якість в комбінації з вишуканим дизайном, з 2002 року
         </p>
       </BrandSection>

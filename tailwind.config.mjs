@@ -7,6 +7,7 @@ export default {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+  
 	screens: {
     sm: '640px',
     md: '768px',
@@ -17,7 +18,10 @@ export default {
   	extend: {
   		colors: {
   			background: 'var(--background)',
-  			foreground: 'var(--foreground)'
+  			foreground: 'var(--foreground)',
+        primary: {
+          DEFAULT: '#FFF0DD',
+        }
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

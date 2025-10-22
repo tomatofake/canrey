@@ -10,7 +10,7 @@ const Footer = () => {
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
   return (
-    <footer className="bg-black text-white px-5 py-10 md:px-10">
+    <footer className="bg-black/60 backdrop:blur text-primary px-5 py-10 md:px-10">
       <div className="flex flex-col xlg:flex-row justify-between gap-10 items-start xlg:items-end">
 
         <div className="max-w-[600px]">

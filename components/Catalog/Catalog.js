@@ -38,7 +38,7 @@ const Catalog = () => {
 
   return (
     <section className="flex flex-col md:mx-10 mx-3 md:my-[120px] my-[60px]">
-      <div className="text-center text-5xl font-bold mt-2 mb-10">
+      <div className="text-center text-primary text-5xl font-bold mt-2 mb-10">
         <h2>Каталог</h2>
       </div>
       <div className="flex flex-col xlg:flex-row justify-center items-center">
