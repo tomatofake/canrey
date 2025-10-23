@@ -17,6 +17,8 @@ const CatalogOverlay = ({ onClose }) => {
 
   useEffect(() => {
     scrollYRef.current = window.scrollY || 0;
+
+    // lock body
     const body = document.body;
     const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
     body.style.overflow = 'hidden';
@@ -26,45 +28,25 @@ const CatalogOverlay = ({ onClose }) => {
     body.style.left = '0';
     body.style.right = '0';
     body.style.width = '100%';
-    body.style.willChange = 'padding-right'; 
+    body.style.willChange = 'padding-right';
 
     const overlayEl = overlayRef.current;
     const items = overlayEl.querySelectorAll('.catalog-item');
     const bgs = overlayEl.querySelectorAll('.catalog-bg');
 
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-
-    tl.fromTo(
-      overlayEl,
-      { opacity: 0, y: '-8%', scale: 0.97 },
-      { opacity: 1, y: '0%', scale: 1, duration: 0.7 }
-    );
-
-    tl.fromTo(
-      bgs,
-      { scale: 1.06, opacity: 0.8 },
-      { scale: 1, opacity: 1, duration: 0.7, stagger: 0.08 },
-      '-=0.4'
-    );
-
-    tl.fromTo(
-      items,
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.25 },
-      '-=0.55'
-    );
+    tl.fromTo(overlayEl, { opacity: 0, y: '-8%', scale: 0.97 }, { opacity: 1, y: '0%', scale: 1, duration: 0.7 });
+    tl.fromTo(bgs, { scale: 1.06, opacity: 0.8 }, { scale: 1, opacity: 1, duration: 0.7, stagger: 0.08 }, '-=0.4');
+    tl.fromTo(items, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25 }, '-=0.55');
 
     const handleEsc = (e) => e.key === 'Escape' && handleClose();
     window.addEventListener('keydown', handleEsc);
-
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
+    return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
   const handleClose = () => {
     const overlayEl = overlayRef.current;
-    if (!overlayEl) return onClose();
+    if (!overlayEl) return onClose?.();
 
     const items = overlayEl.querySelectorAll('.catalog-item');
     const bgs = overlayEl.querySelectorAll('.catalog-bg');
@@ -86,7 +68,7 @@ const CatalogOverlay = ({ onClose }) => {
             b.overflow = '';
             b.willChange = '';
             window.scrollTo(0, scrollYRef.current);
-            onClose();
+            onClose?.();
           },
         });
       },
@@ -100,32 +82,55 @@ const CatalogOverlay = ({ onClose }) => {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[200] bg-black text-white flex flex-col will-change-transform"
+      className="
+        fixed inset-0 z-[200] bg-black text-white flex flex-col
+        min-h-[100svh]  /* враховує док і статус-бар */
+      "
       aria-modal="true"
       role="dialog"
     >
 
-      <div className="absolute inset-x-0 top-4 pointer-events-none z-40 flex justify-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-center tracking-tight">
-            Каталог
-          </h1>
+      <div
+        className="
+          z-40 flex items-center justify-center
+          h-16 md:h-20 px-4
+          pt-[env(safe-area-inset-top)]
+          pointer-events-none
+        "
+      >
+        <h1 className="text-3xl md:text-5xl font-bold text-center tracking-tight">Каталог</h1>
       </div>
 
       <button
         onClick={handleClose}
-        className="absolute top-5  right-6 text-3xl md:text-4xl text-white z-50 p-2 rounded-full bg-black/30 hover:bg-black/50 transition-all duration-300 hover:rotate-90"
+        className="
+          absolute top-3 md:top-4 right-4 md:right-6
+          text-3xl md:text-4xl text-white z-50 p-2 rounded-full
+          bg-black/30 hover:bg-black/50 transition-all duration-300 hover:rotate-90
+        "
         aria-label="Закрити каталог"
       >
         <IoClose />
       </button>
 
-      <div className="flex flex-col lg:flex-row flex-1 w-full min-h-[100vh] pt-[90px]">
+      <div
+        className="
+          flex-1 w-full
+          flex flex-col lg:flex-row
+          pb-[env(safe-area-inset-bottom)]
+        "
+      >
         {categories.map((cat, idx) => (
           <Link
             key={idx}
             href={cat.link}
             onClick={handleClose}
-            className="relative flex-1 group overflow-hidden flex items-center justify-center h-[33.333vh] md:h-auto min-h-[300px] transition-all duration-700"
+            className="
+              relative group overflow-hidden
+              flex items-center justify-center
+              flex-1
+              transition-all duration-700
+            "
           >
             <div className="absolute inset-0 -z-10 transform-gpu transition-transform duration-700 catalog-bg">
               <Image
@@ -133,7 +138,13 @@ const CatalogOverlay = ({ onClose }) => {
                 alt={cat.title}
                 fill
                 priority
-                className="object-cover brightness-[35%] group-hover:brightness-[55%] group-hover:scale-[1.04] transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+                className="
+                  object-cover
+                  brightness-[35%]
+                  group-hover:brightness-[55%]
+                  group-hover:scale-[1.04]
+                  transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]
+                "
               />
             </div>
 
