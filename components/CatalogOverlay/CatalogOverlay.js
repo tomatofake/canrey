@@ -18,7 +18,6 @@ const CatalogOverlay = ({ onClose }) => {
   useEffect(() => {
     scrollYRef.current = window.scrollY || 0;
 
-    // lock body
     const body = document.body;
     const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
     body.style.overflow = 'hidden';
