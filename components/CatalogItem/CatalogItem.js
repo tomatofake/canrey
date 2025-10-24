@@ -2,19 +2,91 @@ import Image from "next/image";
 
 const CatalogItem = ({ title, src }) => {
   return (
-    <div className="relative bg-white flex h-[500px] max-w-[500px] hover:scale-[1.01] transform-gpu transition-all">
+    <div
+      className="
+        group relative overflow-hidden rounded-2xl
+        w-full max-w-[500px] h-[480px] md:h-[500px]
+        bg-black/5 shadow-[0_10px_30px_rgba(0,0,0,0.10)]
+        ring-1 ring-black/5
+        transition-all duration-500
+        hover:shadow-[0_20px_50px_rgba(0,0,0,0.20)]
+        transform-gpu
+      "
+      tabIndex={0}
+      aria-label={title}
+    >
+
       <Image
         src={src}
         alt={title}
         width={570}
         height={550}
-        className="w-full h-full object-cover object-center"
+        className="
+          w-full h-full object-cover object-center
+          transition-transform duration-1000
+          [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
+          group-hover:scale-[1.05] group-focus:scale-[1.05]
+          will-change-transform
+        "
+        priority={false}
       />
-      <div className="absolute text-white text-center text-3xl z-20 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-nowrap">
-        <h2 className="inline-block">{title}</h2>
+      
+      <div
+        className="
+          absolute inset-0 z-10 pointer-events-none
+          bg-black/35
+          transition-opacity duration-500
+          opacity-100 group-hover:opacity-90 group-focus:opacity-90
+        "
+      />
+
+      <div
+        className="
+          pointer-events-none absolute z-20
+          -top-[20%] -left-[35%]  /* старт за пределами */
+          h-[140%] w-[70%]
+          rotate-[18deg]
+          bg-gradient-to-r from-transparent via-white/70 to-transparent
+          mix-blend-overlay
+          blur-[8px]
+          opacity-20
+          translate-x-0
+          transition-all duration-1000 ease-out will-change-transform
+          group-hover:opacity-90 group-hover:translate-x-[180%]
+          group-focus:opacity-90 group-focus:translate-x-[180%]
+        "
+      />
+
+      <div
+        className="
+          absolute inset-0 z-30 flex items-center justify-center
+          px-6 text-center
+        "
+      >
+        <h2
+          className="
+            text-white font-semibold tracking-tight
+            text-2xl sm:text-3xl md:text-4xl
+            drop-shadow-[0_4px_18px_rgba(0,0,0,0.55)]
+            transition-all duration-500
+            translate-y-1 opacity-95
+            group-hover:translate-y-0 group-hover:opacity-100
+            group-focus:translate-y-0 group-focus:opacity-100
+            select-none
+          "
+        >
+          {title}
+        </h2>
       </div>
-      <div className="absolute w-full h-full bg-black/65 top-0 left-0 z-10" />
-      <div className="absolute w-full h-full top-0 left-0 transition-all hover:bg-black/35 z-20" />
+
+      <div
+        className="
+          pointer-events-none absolute inset-0 z-30
+          ring-1 ring-white/10 rounded-2xl
+          opacity-0 transition-opacity duration-500
+          group-hover:opacity-100 group-focus:opacity-100
+        "
+      />
     </div>
   );
 };

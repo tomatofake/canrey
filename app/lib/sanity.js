@@ -44,8 +44,3 @@ export const getData = async (categoryName) => {
   const data = await client.fetch(query, params);
   return data;
 };
-
-
-
-
-
