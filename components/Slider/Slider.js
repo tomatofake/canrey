@@ -43,8 +43,7 @@ const Slider = () => {
     const next = slidesRef.current[to];
     if (!current || !next) return;
 
-    const offsetX = direction === 'right' ? 320 : -320; // сильнее выезд сбоку
-
+    const offsetX = direction === 'right' ? 320 : -320;
     const currentImg = current.querySelector('.image');
     const nextImg = next.querySelector('.image');
     const currentText = current.querySelector('.text');
@@ -82,7 +81,6 @@ const Slider = () => {
       '-=0.6'
     );
 
-    // плавное появление текста
     if (currentText && nextText) {
       gsap.fromTo(
         currentText,
@@ -139,7 +137,7 @@ const Slider = () => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full min-h-[100svh] overflow-hidden bg-black"
+      className="relative w-full min-h-[100svh] overflow-hidden bg-black select-none touch-pan-y"
     >
       <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
       <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-black/25 via-transparent to-black/25" />
@@ -161,7 +159,8 @@ const Slider = () => {
               priority={idx === 0}
               className="image object-cover"
             />
-            <div className="absolute inset-0 bg-black/40" />
+
+            <div className="absolute inset-0 bg-black/40 pointer-events-none" />
             {slide.text && (
               <div className="text absolute text-center text-white px-6 max-w-3xl">
                 <p className="text-3xl md:text-5xl font-semibold leading-snug drop-shadow-lg">
@@ -178,7 +177,7 @@ const Slider = () => {
           handlePrev();
           startAuto();
         }}
-        className="absolute left-5 top-1/2 -translate-y-1/2 z-20 bg-white/20 text-white text-4xl px-4 py-1 rounded-full hover:bg-white/40 transition"
+        className="hidden sm:inline-flex absolute left-5 top-1/2 -translate-y-1/2 z-20 bg-white/20 text-white text-4xl px-4 py-1 rounded-full hover:bg-white/40 transition"
         aria-label="Previous Slide"
       >
         ‹
@@ -188,7 +187,7 @@ const Slider = () => {
           handleNext();
           startAuto();
         }}
-        className="absolute right-5 top-1/2 -translate-y-1/2 z-20 bg-white/20 text-white text-4xl px-4 py-1 rounded-full hover:bg-white/40 transition"
+        className="hidden sm:inline-flex absolute right-5 top-1/2 -translate-y-1/2 z-20 bg-white/20 text-white text-4xl px-4 py-1 rounded-full hover:bg-white/40 transition"
         aria-label="Next Slide"
       >
         ›
