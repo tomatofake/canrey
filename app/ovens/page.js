@@ -25,12 +25,12 @@ const Ovens = () => {
   return (
     <>
       <Header />
-      <main className="min-h-[100vh] max-w-[1920px] mx-auto p-5 xlg:px-8">
+      <main className="min-h-[100vh] max-w-[1920px] mx-auto p-5 pt-[6%] xlg:px-8">
         <div className="mb-4 flex flex-col xlg:flex-row xlg:items-center xlg:gap-6">
           <div className="mb-2 xlg:mb-0">
             <BackButton />
           </div>
-          <h1 className="text-4xl font-bold">Плити</h1>
+          <h1 className="text-4xl text-primary font-bold">Плити</h1>
         </div>
 
         <div className="xl:flex xl:gap-8">

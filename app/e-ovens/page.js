@@ -23,12 +23,12 @@ const EOvens = () => {
   return (
   <>
     <Header />
-    <main className="min-h-[100vh] max-w-[1920px] mx-auto p-5 xl:px-8">
-      <div className="mb-4 flex flex-col xlg:flex-row xlg:items-center xlg:gap-6">
+    <main className="min-h-[100vh] max-w-[1920px] mx-auto p-5 xl:px-8 pt-[6%]">
+      <div className="mb-6 flex flex-col xlg:flex-row xlg:items-center xlg:gap-6">
         <div className="mb-2 xl:mb-0">
           <BackButton />
         </div>
-        <h1 className="text-4xl font-bold">Електричні духовки</h1>
+        <h1 className="text-4xl text-primary font-bold">Електричні духовки</h1>
       </div>
 
       <div className="xl:flex xl:gap-8">

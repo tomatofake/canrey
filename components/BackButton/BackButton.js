@@ -8,7 +8,7 @@ const BackButton = ({ className = '', children }) => {
   return (
     <button
       onClick={() => router.back()}
-      className={`px-4 py-1 flex items-center mr-2 bg-black text-white rounded-full ${className}`}
+      className={`px-4 py-1 flex items-center mr-2 bg-black text-primary rounded-full ${className}`}
     >
       {children || <FaArrowLeft className="mr-1" />}
     </button>

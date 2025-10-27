@@ -6,7 +6,7 @@ const About = () => {
   return (
     <>
       <Header />
-      <main className="px-4 md:px-8 xl:px-20 max-w-[1600px] mx-auto">
+      <main className="px-4 md:px-8 xl:px-20 max-w-[1600px] mx-auto text-primary pt-10">
         <h1 className="text-5xl font-bold text-center mt-16 mb-10">
           Про компанію
         </h1>

@@ -177,20 +177,59 @@ const Slider = () => {
           handlePrev();
           startAuto();
         }}
-        className="hidden sm:inline-flex absolute left-5 top-1/2 -translate-y-1/2 z-20 bg-white/20 text-white text-4xl px-4 py-1 rounded-full hover:bg-white/40 transition"
         aria-label="Previous Slide"
+        className="
+          hidden sm:inline-flex
+          absolute left-4 top-1/2 -translate-y-1/2
+          z-20
+          h-11 w-11
+          items-center justify-center
+          rounded-full
+          bg-black/40 backdrop-blur-sm
+          shadow-sm
+          transition
+          hover:bg-black/55 hover:border-white/35
+        "
       >
-        ‹
+        <svg
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M15 19l-7-7 7-7" className="stroke-white" />
+        </svg>
       </button>
+
       <button
         onClick={() => {
           handleNext();
           startAuto();
         }}
-        className="hidden sm:inline-flex absolute right-5 top-1/2 -translate-y-1/2 z-20 bg-white/20 text-white text-4xl px-4 py-1 rounded-full hover:bg-white/40 transition"
         aria-label="Next Slide"
+        className="
+          hidden sm:inline-flex
+          absolute right-4 top-1/2 -translate-y-1/2
+          z-20
+          h-11 w-11
+          items-center justify-center
+          rounded-full
+          bg-black/40 backdrop-blur-sm
+          shadow-sm
+          transition
+          hover:bg-black/55 hover:border-white/35
+        "
       >
-        ›
+        <svg
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M9 5l7 7-7 7" className="stroke-white" />
+        </svg>
       </button>
     </div>
   );
