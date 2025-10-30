@@ -15,3 +15,12 @@ button {
     --radius: 0.5rem;
   }
 }
+
+html, body { height: 100%; -webkit-text-size-adjust: 100%; }
+html { height: -webkit-fill-available; }
+body { min-height: 100svh; min-height: -webkit-fill-available; }
+
+.vh-stable { height: 100svh; }
+
+.layer-3d { will-change: transform; transform: translateZ(0); backface-visibility: hidden; }
+.blur-clip { contain: paint; }

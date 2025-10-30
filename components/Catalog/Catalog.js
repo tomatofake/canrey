@@ -29,7 +29,6 @@ export default function Catalog() {
     maxOffset: 0,
   });
 
-  // media-query (≤1080 — мобільний режим із свайпом)
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`);
     const apply = () => setDims(d => ({ ...d, isMobile: mql.matches }));
@@ -38,16 +37,15 @@ export default function Catalog() {
     return () => mql.removeEventListener('change', apply);
   }, []);
 
-  // перерахунок геометрії
   const recalc = () => {
     if (!containerRef.current) return;
     const vw = containerRef.current.clientWidth;
 
-    // ширина картки на мобілці ~88% контейнера, з межами
+
     const itemW = Math.min(620, Math.max(260, Math.round(vw * 0.88)));
     const gap = 16;
     const leftPad = 24;
-    const rightPad = 0; // без правого відступу — остання картка стає врівень справа
+    const rightPad = 0;
 
     const contentWidth = leftPad + slides.length * (itemW + gap) - gap + rightPad;
     const maxOffset = Math.max(0, contentWidth - vw);
@@ -57,7 +55,7 @@ export default function Catalog() {
   };
 
   useEffect(() => {
-    // захист від вертикального скролу під час горизонтального свайпу
+
     if (containerRef.current) {
       containerRef.current.style.touchAction = 'pan-y';
       containerRef.current.style.overscrollBehaviorX = 'contain';
@@ -68,7 +66,6 @@ export default function Catalog() {
       window.addEventListener('resize', recalc);
       return () => window.removeEventListener('resize', recalc);
     } else {
-      // скинути трансформації, коли повертаємось на десктоп
       if (trackRef.current) {
         trackRef.current.style.transition = 'none';
         trackRef.current.style.transform  = 'none';
@@ -95,7 +92,6 @@ export default function Catalog() {
     trackRef.current.style.transform = `translate3d(${x}px,0,0)`;
   };
 
-  // свайп без «смикань»: pointer+touch, блокування осі після порогу
   useEffect(() => {
     if (!dims.isMobile || !containerRef.current || !trackRef.current) return;
 
@@ -103,7 +99,7 @@ export default function Catalog() {
     let startY = 0;
     let deltaX = 0;
     let dragging = false;
-    let lockedAxis = null; // 'x' | 'y' | null
+    let lockedAxis = null;
     let raf = null;
 
     const area = containerRef.current;
@@ -134,18 +130,15 @@ export default function Catalog() {
       const dx = p.clientX - startX;
       const dy = p.clientY - startY;
 
-      // фіксуємо вісь, коли зрозумілий напрям
       if (!lockedAxis) {
         if (Math.abs(dx) > 12) lockedAxis = 'x';
         else if (Math.abs(dy) > 12) lockedAxis = 'y';
       }
 
       if (lockedAxis === 'x') {
-        // блокуємо нативний вертикальний скролл, коли вже тягнемо по X
         if (e.cancelable) e.preventDefault();
         deltaX = dx;
 
-        // межі
         const { itemW, gap, leftPad, maxOffset } = dims;
         const base = leftPad + idx * (itemW + gap);
         let currentOffset = base - deltaX;
@@ -172,14 +165,12 @@ export default function Catalog() {
       else slideTo(idx, { animate: true });
     };
 
-    // pointer
     area.addEventListener('pointerdown', onDown, { passive: true });
-    area.addEventListener('pointermove', onMove, { passive: false }); // важливо: false для preventDefault
+    area.addEventListener('pointermove', onMove, { passive: false });
     area.addEventListener('pointerup', onUp,   { passive: true });
     area.addEventListener('pointercancel', onUp, { passive: true });
     area.addEventListener('pointerleave', onUp,  { passive: true });
 
-    // touch (знадобиться на деяких браузерах без pointer events)
     area.addEventListener('touchstart', onDown, { passive: true });
     area.addEventListener('touchmove',  onMove, { passive: false });
     area.addEventListener('touchend',   onUp,   { passive: true });
@@ -200,7 +191,6 @@ export default function Catalog() {
     };
   }, [dims.isMobile, dims.itemW, dims.maxOffset, idx]);
 
-  // Вхідні анімації тільки на десктопі (щоб не конфліктували зі свайпом)
   const leftRef = useRef(null);
   const centerRef = useRef(null);
   const rightRef = useRef(null);
