@@ -18,12 +18,10 @@ export default function CatalogOverlay({ onClose }) {
   const scrollYRef = useRef(0);
   const bodyPrev = useRef(null);
 
-  // 1) Даём React смонтировать портал
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 2) Когда портал и overlayRef готовы — блокируем body и запускаем анимации
   useEffect(() => {
     if (!mounted || !overlayRef.current) return;
 
