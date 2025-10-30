@@ -33,6 +33,7 @@ const CatalogItem = ({ title, src, className }) => {
             [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
             transform-gpu will-change-transform
             select-none pointer-events-none
+            group-active:scale-[1.02]
             xlg:group-hover:scale-[1.05] xlg:group-focus:scale-[1.05]
           "
           priority={false}
@@ -42,19 +43,24 @@ const CatalogItem = ({ title, src, className }) => {
           className="
             absolute inset-0 z-10 pointer-events-none
             bg-black/35
-            opacity-95
             transition-opacity duration-700
+            opacity-95
+            group-active:opacity-85
             xlg:opacity-100 xlg:group-hover:opacity-90 xlg:group-focus:opacity-90
           "
         />
 
         <div
           className="
-            hidden xlg:block pointer-events-none absolute z-20
+            pointer-events-none absolute z-20
             -top-[20%] -left-[35%] h-[140%] w-[70%] rotate-[18deg]
             bg-gradient-to-r from-transparent via-white/70 to-transparent
-            mix-blend-overlay blur-[8px] opacity-20 translate-x-0
+            mix-blend-overlay blur-[8px]
+            opacity-0
             transition-all duration-1000 ease-out
+            translate-x-0
+            hidden xlg:block
+            xlg:opacity-20
             xlg:group-hover:opacity-90 xlg:group-hover:translate-x-[180%]
             xlg:group-focus:opacity-90 xlg:group-focus:translate-x-[180%]
           "
@@ -67,11 +73,13 @@ const CatalogItem = ({ title, src, className }) => {
             text-white font-semibold tracking-tight
             text-2xl sm:text-3xl md:text-4xl
             drop-shadow-[0_4px_18px_rgba(0,0,0,0.55)]
-            select-none
             transition-all duration-600
+            translate-y-0 opacity-100
+            group-active:scale-[1.01]
             xlg:translate-y-1 xlg:opacity-95
             xlg:group-hover:translate-y-0 xlg:group-hover:opacity-100
             xlg:group-focus:translate-y-0 xlg:group-focus:opacity-100
+            select-none
           "
         >
           {title}
