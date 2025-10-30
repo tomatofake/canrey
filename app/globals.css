@@ -18,17 +18,23 @@ button {
 
 html, body {
   height: 100%;
+  background: #171718;
   overscroll-behavior-y: none;
   -webkit-text-size-adjust: 100%;
-  background: #171718;
 }
 
-.h-viewport {
-  height: 100svh;
-  height: 100dvh;
+.h-viewport { height: 100svh; height: 100dvh; }
+.min-h-viewport { min-height: 100svh; min-height: 100dvh; }
+
+.ios-composite {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 
-.min-h-viewport {
-  min-height: 100svh;
-  min-height: 100dvh;
+@supports (-webkit-touch-callout: none) {
+  .ios-no-filter { filter: none !important; }
+  .ios-no-scale { transform: none !important; }
+  .ios-sticky-open { overflow: visible !important; }
 }

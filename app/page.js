@@ -26,23 +26,47 @@ export default function Home() {
     if (reduce) return
 
     ScrollTrigger.config({ ignoreMobileResize: true })
+    const mm = gsap.matchMedia()
 
-    const ctx = gsap.context(() => {
+    const ENTER_OFFSET_MAIN = -200
+    const ENTER_OFFSET_FOOTER = 140
+
+    const commonInit = () => {
       gsap.set([heroInnerRef.current, mainInnerRef.current, footerInnerRef.current], {
         force3D: true,
         willChange: 'transform'
       })
-
-      gsap.set(heroInnerRef.current, { yPercent: 0, scale: 1, filter: 'blur(0px)', opacity: 1 })
       gsap.set(heroTopMaskRef.current, { opacity: 0.06 })
+    }
+
+    mm.add('(hover: none) and (pointer: coarse)', () => {
+      commonInit()
 
       gsap.timeline({
-        scrollTrigger: {
-          trigger: '#hero-wrapper',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
-        },
+        scrollTrigger: { trigger: '#hero-wrapper', start: 'top top', end: 'bottom top', scrub: true },
+        defaults: { ease: 'none' }
+      })
+      .to(heroInnerRef.current, { yPercent: -3 }, 0)
+      .to(heroTopMaskRef.current, { opacity: 0.05 }, 0)
+
+      gsap.set(mainInnerRef.current, { y: ENTER_OFFSET_MAIN, opacity: 0.96 })
+      gsap.timeline({
+        scrollTrigger: { trigger: '#main-wrapper', start: 'top bottom', end: 'top top', scrub: true },
+        defaults: { ease: 'none' }
+      }).to(mainInnerRef.current, { y: 0, opacity: 1 }, 0)
+
+      gsap.set(footerInnerRef.current, { y: ENTER_OFFSET_FOOTER, opacity: 0.97 })
+      gsap.timeline({
+        scrollTrigger: { trigger: '#footer-wrapper', start: 'top bottom', end: 'top top', scrub: true },
+        defaults: { ease: 'none' }
+      }).to(footerInnerRef.current, { y: 0, opacity: 1 }, 0)
+    })
+
+    mm.add('(hover: hover) and (pointer: fine)', () => {
+      commonInit()
+
+      gsap.timeline({
+        scrollTrigger: { trigger: '#hero-wrapper', start: 'top top', end: 'bottom top', scrub: true },
         defaults: { ease: 'none' }
       })
       .to(heroInnerRef.current, {
@@ -53,36 +77,20 @@ export default function Home() {
       }, 0)
       .to(heroTopMaskRef.current, { opacity: 0.05 }, 0)
 
-      const ENTER_OFFSET_MAIN = -200
-      gsap.set(mainInnerRef.current, { y: ENTER_OFFSET_MAIN, opacity: 0.96, filter: 'blur(0.25px)' })
-
+      gsap.set(mainInnerRef.current, { y: ENTER_OFFSET_MAIN, opacity: 0.96, filter: 'blur(0.2px)' })
       gsap.timeline({
-        scrollTrigger: {
-          trigger: '#main-wrapper',
-          start: 'top bottom',
-          end: 'top top',
-          scrub: true
-        },
+        scrollTrigger: { trigger: '#main-wrapper', start: 'top bottom', end: 'top top', scrub: true },
         defaults: { ease: 'none' }
-      })
-      .to(mainInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
+      }).to(mainInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
 
-      const ENTER_OFFSET_FOOTER = 140
       gsap.set(footerInnerRef.current, { y: ENTER_OFFSET_FOOTER, opacity: 0.97, filter: 'blur(0.2px)' })
-
       gsap.timeline({
-        scrollTrigger: {
-          trigger: '#footer-wrapper',
-          start: 'top bottom',
-          end: 'top top',
-          scrub: true
-        },
+        scrollTrigger: { trigger: '#footer-wrapper', start: 'top bottom', end: 'top top', scrub: true },
         defaults: { ease: 'none' }
-      })
-      .to(footerInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
+      }).to(footerInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
     })
 
-    return () => ctx.revert()
+    return () => mm.revert()
   }, [])
 
   return (
@@ -92,9 +100,9 @@ export default function Home() {
       <main className="bg-[#171718]">
         <section id="hero-wrapper" className="relative">
           <div className="h-viewport">
-            <div className="sticky top-0 h-viewport z-20 overflow-hidden">
+            <div className="sticky top-0 h-viewport z-20 overflow-hidden ios-sticky-open ios-composite">
               <div className="relative h-full">
-                <div ref={heroInnerRef} className="h-full">
+                <div ref={heroInnerRef} className="h-full ios-composite ios-no-filter ios-no-scale">
                   <Hero />
                 </div>
                 <div
@@ -106,18 +114,16 @@ export default function Home() {
           </div>
         </section>
 
-        {/* MAIN */}
         <section id="main-wrapper" className="relative z-[10]">
-          <div ref={mainInnerRef}>
+          <div ref={mainInnerRef} className="ios-composite ios-no-filter">
             <Catalog />
             <Features />
           </div>
         </section>
       </main>
 
-      {/* FOOTER */}
       <section id="footer-wrapper" className="relative z-0 -mt-px">
-        <div ref={footerInnerRef}>
+        <div ref={footerInnerRef} className="ios-composite ios-no-filter">
           <Footer />
         </div>
       </section>
