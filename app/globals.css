@@ -16,11 +16,19 @@ button {
   }
 }
 
-html, body { height: 100%; -webkit-text-size-adjust: 100%; }
-html { height: -webkit-fill-available; }
-body { min-height: 100svh; min-height: -webkit-fill-available; }
+html, body {
+  height: 100%;
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
+  background: #171718;
+}
 
-.vh-stable { height: 100svh; }
+.h-viewport {
+  height: 100svh;
+  height: 100dvh;
+}
 
-.layer-3d { will-change: transform; transform: translateZ(0); backface-visibility: hidden; }
-.blur-clip { contain: paint; }
+.min-h-viewport {
+  min-height: 100svh;
+  min-height: 100dvh;
+}

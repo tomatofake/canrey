@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -15,7 +16,6 @@ export default function Home() {
   const heroInnerRef   = useRef(null)
   const mainInnerRef   = useRef(null)
   const footerInnerRef = useRef(null)
-
   const heroTopMaskRef = useRef(null)
 
   useEffect(() => {
@@ -24,6 +24,8 @@ export default function Home() {
       window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) return
+
+    ScrollTrigger.config({ ignoreMobileResize: true })
 
     const ctx = gsap.context(() => {
       gsap.set([heroInnerRef.current, mainInnerRef.current, footerInnerRef.current], {
@@ -45,14 +47,14 @@ export default function Home() {
       })
       .to(heroInnerRef.current, {
         yPercent: -3,
-        scale: 0.995,
-        filter: 'blur(0.3px)',
-        opacity: 0.985
+        scale: 0.997,
+        filter: 'blur(0.25px)',
+        opacity: 0.988
       }, 0)
       .to(heroTopMaskRef.current, { opacity: 0.05 }, 0)
 
       const ENTER_OFFSET_MAIN = -200
-      gsap.set(mainInnerRef.current, { y: ENTER_OFFSET_MAIN, opacity: 0.94, filter: 'blur(0.3px)' })
+      gsap.set(mainInnerRef.current, { y: ENTER_OFFSET_MAIN, opacity: 0.96, filter: 'blur(0.25px)' })
 
       gsap.timeline({
         scrollTrigger: {
@@ -66,7 +68,7 @@ export default function Home() {
       .to(mainInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
 
       const ENTER_OFFSET_FOOTER = 140
-      gsap.set(footerInnerRef.current, { y: ENTER_OFFSET_FOOTER, opacity: 0.96, filter: 'blur(0.2px)' })
+      gsap.set(footerInnerRef.current, { y: ENTER_OFFSET_FOOTER, opacity: 0.97, filter: 'blur(0.2px)' })
 
       gsap.timeline({
         scrollTrigger: {
@@ -89,10 +91,10 @@ export default function Home() {
 
       <main className="bg-[#171718]">
         <section id="hero-wrapper" className="relative">
-          <div className="h-[100svh]">
-            <div className="sticky top-0 h-[100svh] z-20 overflow-hidden">
+          <div className="h-viewport">
+            <div className="sticky top-0 h-viewport z-20 overflow-hidden">
               <div className="relative h-full">
-                <div ref={heroInnerRef} className="h-full border-">
+                <div ref={heroInnerRef} className="h-full">
                   <Hero />
                 </div>
                 <div
@@ -104,6 +106,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* MAIN */}
         <section id="main-wrapper" className="relative z-[10]">
           <div ref={mainInnerRef}>
             <Catalog />
@@ -112,6 +115,7 @@ export default function Home() {
         </section>
       </main>
 
+      {/* FOOTER */}
       <section id="footer-wrapper" className="relative z-0 -mt-px">
         <div ref={footerInnerRef}>
           <Footer />
