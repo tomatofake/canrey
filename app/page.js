@@ -51,7 +51,7 @@ export default function Home() {
       }, 0)
       .to(heroTopMaskRef.current, { opacity: 0.05 }, 0)
 
-      const ENTER_OFFSET_MAIN = -200
+      const ENTER_OFFSET_MAIN = -250
       gsap.set(mainInnerRef.current, { y: ENTER_OFFSET_MAIN, opacity: 0.94, filter: 'blur(0.3px)' })
 
       gsap.timeline({

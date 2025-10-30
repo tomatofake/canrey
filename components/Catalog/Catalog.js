@@ -43,7 +43,7 @@ export default function Catalog() {
 
     const itemW = Math.min(620, Math.max(260, Math.round(vw * 0.88)));
     const gap = 16;
-    const leftPad = 24;
+    const leftPad = 9;
     const rightPad = 0;
 
     const contentWidth = leftPad + slides.length * (itemW + gap) - gap + rightPad;
@@ -224,7 +224,7 @@ export default function Catalog() {
           relative
           overflow-hidden
           min-w-0 min-h-0
-          ${dims.isMobile ? 'pl-6' : 'pl-0'}
+          ${dims.isMobile ? 'pl-3' : 'pl-0'}
         `}
       >
         <Arrow dir="left"  onClick={() => slideTo(idx - 1)} hidden={!dims.isMobile || idx === 0} />
