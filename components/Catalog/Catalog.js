@@ -14,11 +14,10 @@ const slides = [
 ];
 
 const MOBILE_MAX = 1080;
-const DEBOUNCE_MS = 80;
 
 export default function Catalog() {
   const containerRef = useRef(null);
-  const trackRef = useRef(null);
+  const trackRef     = useRef(null);
 
   const [idx, setIdx] = useState(0);
   const [dims, setDims] = useState({
@@ -30,6 +29,7 @@ export default function Catalog() {
     maxOffset: 0,
   });
 
+  // media-query (≤1080 — мобільний режим із свайпом)
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`);
     const apply = () => setDims(d => ({ ...d, isMobile: mql.matches }));
@@ -38,9 +38,44 @@ export default function Catalog() {
     return () => mql.removeEventListener('change', apply);
   }, []);
 
-  const lastWidthRef = useRef(0);
-  const recalcRaf = useRef(null);
-  const recalcTmr = useRef(null);
+  // перерахунок геометрії
+  const recalc = () => {
+    if (!containerRef.current) return;
+    const vw = containerRef.current.clientWidth;
+
+    // ширина картки на мобілці ~88% контейнера, з межами
+    const itemW = Math.min(620, Math.max(260, Math.round(vw * 0.88)));
+    const gap = 16;
+    const leftPad = 24;
+    const rightPad = 0; // без правого відступу — остання картка стає врівень справа
+
+    const contentWidth = leftPad + slides.length * (itemW + gap) - gap + rightPad;
+    const maxOffset = Math.max(0, contentWidth - vw);
+
+    setDims(d => ({ ...d, vw, itemW, gap, leftPad, maxOffset }));
+    requestAnimationFrame(() => slideTo(idx, { animate: false }));
+  };
+
+  useEffect(() => {
+    // захист від вертикального скролу під час горизонтального свайпу
+    if (containerRef.current) {
+      containerRef.current.style.touchAction = 'pan-y';
+      containerRef.current.style.overscrollBehaviorX = 'contain';
+    }
+
+    if (dims.isMobile) {
+      recalc();
+      window.addEventListener('resize', recalc);
+      return () => window.removeEventListener('resize', recalc);
+    } else {
+      // скинути трансформації, коли повертаємось на десктоп
+      if (trackRef.current) {
+        trackRef.current.style.transition = 'none';
+        trackRef.current.style.transform  = 'none';
+      }
+      if (idx !== 0) setIdx(0);
+    }
+  }, [dims.isMobile]);
 
   const clamp = (n, min, max) => Math.max(min, Math.min(n, max));
 
@@ -48,66 +83,127 @@ export default function Catalog() {
     const n = clamp(to, 0, slides.length - 1);
     setIdx(n);
     if (!trackRef.current || !dims.isMobile) return;
+
     const { itemW, gap, leftPad, maxOffset } = dims;
     const baseOffset = leftPad + n * (itemW + gap);
     const targetOffset = Math.min(baseOffset, maxOffset);
+
     const x = -targetOffset;
-    trackRef.current.style.transition = animate ? 'transform 420ms cubic-bezier(.2,.8,.2,1)' : 'none';
+    trackRef.current.style.transition = animate
+      ? 'transform 420ms cubic-bezier(.2,.8,.2,1)'
+      : 'none';
     trackRef.current.style.transform = `translate3d(${x}px,0,0)`;
   };
 
-  const recalc = () => {
-    if (!containerRef.current) return;
-    const vw = containerRef.current.clientWidth;
-    if (Math.abs(vw - lastWidthRef.current) < 1) return;
-    lastWidthRef.current = vw;
-
-    const itemW = Math.min(620, Math.max(260, Math.round(vw * 0.88)));
-    const gap = 16;
-    const leftPad = 24;
-    const rightPad = 0;
-    const contentWidth = leftPad + slides.length * (itemW + gap) - gap + rightPad;
-    const maxOffset = Math.max(0, contentWidth - vw);
-
-    setDims(d => ({ ...d, vw, itemW, gap, leftPad, maxOffset }));
-
-    if (recalcRaf.current) cancelAnimationFrame(recalcRaf.current);
-    recalcRaf.current = requestAnimationFrame(() => slideTo(idx, { animate: false }));
-  };
-
-  const debouncedRecalc = () => {
-    if (recalcTmr.current) clearTimeout(recalcTmr.current);
-    recalcTmr.current = setTimeout(recalc, DEBOUNCE_MS);
-  };
-
+  // свайп без «смикань»: pointer+touch, блокування осі після порогу
   useEffect(() => {
-    if (containerRef.current) containerRef.current.style.touchAction = 'pan-y';
+    if (!dims.isMobile || !containerRef.current || !trackRef.current) return;
 
-    if (dims.isMobile) {
-      lastWidthRef.current = 0;
-      recalc();
-      window.addEventListener('resize', debouncedRecalc);
-      const vv = window.visualViewport;
-      vv && vv.addEventListener('resize', debouncedRecalc);
-      return () => {
-        window.removeEventListener('resize', debouncedRecalc);
-        vv && vv.removeEventListener('resize', debouncedRecalc);
-        if (recalcTmr.current) clearTimeout(recalcTmr.current);
-        if (recalcRaf.current) cancelAnimationFrame(recalcRaf.current);
-      };
-    } else {
-      if (trackRef.current) {
-        trackRef.current.style.transition = 'none';
-        trackRef.current.style.transform = 'none';
+    let startX = 0;
+    let startY = 0;
+    let deltaX = 0;
+    let dragging = false;
+    let lockedAxis = null; // 'x' | 'y' | null
+    let raf = null;
+
+    const area = containerRef.current;
+
+    const applyTransform = (px) => {
+      if (!trackRef.current) return;
+      trackRef.current.style.transform = `translate3d(${px}px,0,0)`;
+    };
+
+    const onDown = (e) => {
+      dragging = true;
+      lockedAxis = null;
+      deltaX = 0;
+
+      const p = 'touches' in e ? e.touches[0] : e;
+      startX = p.clientX;
+      startY = p.clientY;
+
+      trackRef.current.style.transition = 'none';
+      if ('pointerId' in e && area.setPointerCapture) {
+        try { area.setPointerCapture(e.pointerId); } catch {}
       }
-      if (idx !== 0) setIdx(0);
-    }
-  }, [dims.isMobile]);
+    };
 
+    const onMove = (e) => {
+      if (!dragging) return;
+      const p = 'touches' in e ? e.touches[0] : e;
+      const dx = p.clientX - startX;
+      const dy = p.clientY - startY;
+
+      // фіксуємо вісь, коли зрозумілий напрям
+      if (!lockedAxis) {
+        if (Math.abs(dx) > 12) lockedAxis = 'x';
+        else if (Math.abs(dy) > 12) lockedAxis = 'y';
+      }
+
+      if (lockedAxis === 'x') {
+        // блокуємо нативний вертикальний скролл, коли вже тягнемо по X
+        if (e.cancelable) e.preventDefault();
+        deltaX = dx;
+
+        // межі
+        const { itemW, gap, leftPad, maxOffset } = dims;
+        const base = leftPad + idx * (itemW + gap);
+        let currentOffset = base - deltaX;
+        currentOffset = Math.max(0, Math.min(currentOffset, maxOffset));
+        const x = -currentOffset;
+
+        if (!raf) {
+          raf = requestAnimationFrame(() => {
+            applyTransform(x);
+            raf = null;
+          });
+        }
+      }
+    };
+
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      lockedAxis = null;
+
+      const threshold = 50;
+      if (deltaX <= -threshold) slideTo(idx + 1);
+      else if (deltaX >= threshold) slideTo(idx - 1);
+      else slideTo(idx, { animate: true });
+    };
+
+    // pointer
+    area.addEventListener('pointerdown', onDown, { passive: true });
+    area.addEventListener('pointermove', onMove, { passive: false }); // важливо: false для preventDefault
+    area.addEventListener('pointerup', onUp,   { passive: true });
+    area.addEventListener('pointercancel', onUp, { passive: true });
+    area.addEventListener('pointerleave', onUp,  { passive: true });
+
+    // touch (знадобиться на деяких браузерах без pointer events)
+    area.addEventListener('touchstart', onDown, { passive: true });
+    area.addEventListener('touchmove',  onMove, { passive: false });
+    area.addEventListener('touchend',   onUp,   { passive: true });
+    area.addEventListener('touchcancel',onUp,   { passive: true });
+
+    return () => {
+      area.removeEventListener('pointerdown', onDown);
+      area.removeEventListener('pointermove', onMove);
+      area.removeEventListener('pointerup', onUp);
+      area.removeEventListener('pointercancel', onUp);
+      area.removeEventListener('pointerleave', onUp);
+
+      area.removeEventListener('touchstart', onDown);
+      area.removeEventListener('touchmove', onMove);
+      area.removeEventListener('touchend', onUp);
+      area.removeEventListener('touchcancel', onUp);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [dims.isMobile, dims.itemW, dims.maxOffset, idx]);
+
+  // Вхідні анімації тільки на десктопі (щоб не конфліктували зі свайпом)
   const leftRef = useRef(null);
   const centerRef = useRef(null);
   const rightRef = useRef(null);
-
   useEffect(() => {
     const mm = gsap.matchMedia();
     mm.add('(min-width: 1081px)', () => {
@@ -119,13 +215,13 @@ export default function Catalog() {
             opacity: 1, x: 0, y: 0,
             duration: 1.1, ease: 'power2.out',
             immediateRender: false,
-            scrollTrigger: { trigger: el, start: 'top 80%' },
+            scrollTrigger: { trigger: el, start: 'top 80%' }
           }
         );
       };
-      animateFrom(leftRef.current, -120, 0);
-      animateFrom(centerRef.current, 0, 120);
-      animateFrom(rightRef.current, 120, 0);
+      animateFrom(leftRef.current,  -120, 0);
+      animateFrom(centerRef.current,   0,  120);
+      animateFrom(rightRef.current, 120,  0);
     });
     return () => mm.revert();
   }, []);
@@ -139,7 +235,7 @@ export default function Catalog() {
         ${dims.isMobile ? 'block' : 'hidden'}
         absolute z-20 top-1/2 -translate-y-1/2
         h-11 w-11 rounded-full
-        bg-black/45 backdrop-blur-[3px]
+        bg-black/45 backdrop-blur-sm
         grid place-items-center
         shadow-sm transition
         hover:bg-black/60 active:scale-95
@@ -147,40 +243,51 @@ export default function Catalog() {
         ${hidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}
       `}
     >
-      <svg viewBox="0 0 24 24" className="h-5 w-5 block" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="white" strokeWidth="2">
         {dir === 'left' ? <path d="M15 19l-7-7 7-7" /> : <path d="M9 5l7 7-7 7" />}
       </svg>
     </button>
   );
 
-  const itemStyle = useMemo(() => (dims.isMobile ? { width: `${dims.itemW}px` } : undefined), [dims.isMobile, dims.itemW]);
-  const cardWrapClass = dims.isMobile ? 'shrink-0' : 'shrink basis-[clamp(360px,34vw,720px)] max-w-[720px]';
+  const itemStyle = useMemo(
+    () => (dims.isMobile ? { width: `${dims.itemW}px` } : undefined),
+    [dims.isMobile, dims.itemW]
+  );
+  const cardWrapClass = dims.isMobile
+    ? 'shrink-0'
+    : 'shrink basis-[clamp(360px,34vw,720px)] max-w-[720px]';
 
   return (
-    <section className="flex flex-col mx-3 lg:mx-10 my-[60px] lg:my-[120px]">
+    <section className="flex flex-col mx-3 lg:mx-10 my-[60px] lg:my-[120px] select-none">
       <div className="text-center text-primary text-5xl font-bold mt-2 mb-10">
         <h2>Каталог</h2>
       </div>
 
       <div
         ref={containerRef}
-        className={`relative overflow-hidden min-w-0 min-h-0 ${dims.isMobile ? 'pl-6' : 'pl-0'}`}
+        className={`
+          relative overflow-hidden min-w-0 min-h-0
+          ${dims.isMobile ? 'pl-6' : 'pl-0'}
+        `}
       >
-        <Arrow dir="left" onClick={() => slideTo(idx - 1)} hidden={!dims.isMobile || idx === 0} />
+        <Arrow dir="left"  onClick={() => slideTo(idx - 1)} hidden={!dims.isMobile || idx === 0} />
         <Arrow dir="right" onClick={() => slideTo(idx + 1)} hidden={!dims.isMobile || idx === slides.length - 1} />
 
         <div
           ref={trackRef}
-          className={`flex items-stretch ${dims.isMobile ? 'gap-4 justify-start' : 'gap-8 justify-center'} will-change-transform min-w-0 min-h-0`}
+          className={`
+            flex items-stretch will-change-transform min-w-0 min-h-0
+            ${dims.isMobile ? 'gap-4 justify-start' : 'gap-8 justify-center'}
+          `}
           style={{ transform: 'translate3d(0,0,0)' }}
         >
-          <div ref={leftRef} className={cardWrapClass} style={itemStyle}>
+          <div ref={leftRef}   className={cardWrapClass} style={itemStyle}>
             <Link href={slides[0].href}><CatalogItem title={slides[0].title} src={slides[0].src} /></Link>
           </div>
           <div ref={centerRef} className={cardWrapClass} style={itemStyle}>
             <Link href={slides[1].href}><CatalogItem title={slides[1].title} src={slides[1].src} /></Link>
           </div>
-          <div ref={rightRef} className={cardWrapClass} style={itemStyle}>
+          <div ref={rightRef}  className={cardWrapClass} style={itemStyle}>
             <Link href={slides[2].href}><CatalogItem title={slides[2].title} src={slides[2].src} /></Link>
           </div>
         </div>

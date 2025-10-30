@@ -7,14 +7,12 @@ const CatalogItem = ({ title, src, className }) => {
     <div
       className={clsx(
         `
-        group relative overflow-hidden rounded-2xl
-        w-full
+        group relative overflow-hidden rounded-2xl w-full
         aspect-[10/9] xlg:aspect-[5/6]
         bg-black/5 shadow-[0_10px_30px_rgba(0,0,0,0.10)]
-        ring-1 ring-black/5
-        transition-all duration-500
+        ring-1 ring-black/5 transition-all duration-500
         hover:shadow-[0_20px_50px_rgba(0,0,0,0.20)]
-        transform-gpu
+        will-change-transform transform-gpu backface-hidden
         `,
         className
       )}
@@ -32,8 +30,8 @@ const CatalogItem = ({ title, src, className }) => {
           transition-transform duration-1000
           [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
           group-hover:scale-[1.05] group-focus:scale-[1.05]
-          will-change-transform
           select-none pointer-events-none
+          will-change-transform
         "
         priority={false}
       />
