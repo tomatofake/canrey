@@ -14,6 +14,7 @@ const slides = [
 ];
 
 const MOBILE_MAX = 1080;
+const LEFT_SPACER = 24;
 
 export default function Catalog() {
   const containerRef = useRef(null);
@@ -24,7 +25,6 @@ export default function Catalog() {
     vw: 0,
     itemW: 0,
     gap: 16,
-    leftPad: 24,
     isMobile: false,
     maxOffset: 0,
   });
@@ -32,10 +32,9 @@ export default function Catalog() {
   useLayoutEffect(() => {
     const isMob = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`).matches;
     setDims(d => ({ ...d, isMobile: isMob }));
-
-    if (isMob && trackRef.current) {
+    if (trackRef.current) {
       trackRef.current.style.willChange = 'transform';
-      trackRef.current.style.transform = `translate3d(${-24}px,0,0)`;
+      trackRef.current.style.transform = 'translate3d(0,0,0)';
       trackRef.current.style.transition = 'none';
     }
   }, []);
@@ -51,34 +50,28 @@ export default function Catalog() {
         if (idx !== 0) setIdx(0);
       } else if (isMob && trackRef.current) {
         trackRef.current.style.transition = 'none';
-        trackRef.current.style.transform  = `translate3d(${-dims.leftPad}px,0,0)`;
+        trackRef.current.style.transform  = 'translate3d(0,0,0)';
       }
     };
     mql.addEventListener('change', onChange);
     return () => mql.removeEventListener('change', onChange);
-  }, [idx, dims.leftPad]);
+  }, [idx]);
 
   const recalc = () => {
     if (!containerRef.current) return;
     const vw = containerRef.current.clientWidth;
-
     const itemW = Math.min(620, Math.max(260, Math.round(vw * 0.88)));
     const gap = 16;
-    const leftPad = 24;
-    const rightPad = 0;
 
-    const contentWidth = leftPad + slides.length * (itemW + gap) - gap + rightPad;
+    const contentWidth = LEFT_SPACER + slides.length * (itemW + gap) - gap;
     const maxOffset = Math.max(0, contentWidth - vw);
 
-    setDims(d => ({ ...d, vw, itemW, gap, leftPad, maxOffset }));
-
+    setDims(d => ({ ...d, vw, itemW, gap, maxOffset }));
     requestAnimationFrame(() => slideTo(idx, { animate: false }));
   };
 
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.style.touchAction = 'pan-y';
-    }
+    if (containerRef.current) containerRef.current.style.touchAction = 'pan-y';
 
     if (dims.isMobile) {
       recalc();
@@ -101,8 +94,8 @@ export default function Catalog() {
     setIdx(n);
     if (!trackRef.current || !dims.isMobile) return;
 
-    const { itemW, gap, leftPad, maxOffset } = dims;
-    const baseOffset = leftPad + n * (itemW + gap);
+    const { itemW, gap, maxOffset } = dims;
+    const baseOffset = LEFT_SPACER + n * (itemW + gap);
     const targetOffset = Math.min(baseOffset, maxOffset);
     const x = -targetOffset;
 
@@ -136,8 +129,8 @@ export default function Catalog() {
       const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
       delta = x - startX;
 
-      const { itemW, gap, leftPad, maxOffset } = dims;
-      const base = leftPad + idx * (itemW + gap);
+      const { itemW, gap, maxOffset } = dims;
+      const base = LEFT_SPACER + idx * (itemW + gap);
       let currentOffset = base - delta;
       currentOffset = Math.max(0, Math.min(currentOffset, maxOffset));
       trackRef.current.style.transform = `translate3d(${-currentOffset}px,0,0)`;
@@ -175,7 +168,7 @@ export default function Catalog() {
       area.removeEventListener('touchend', onUp);
       area.removeEventListener('touchcancel', onUp);
     };
-  }, [dims.isMobile, dims.itemW, dims.maxOffset, idx]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dims.isMobile, dims.itemW, dims.maxOffset, idx]);
 
   const leftRef = useRef(null);
   const centerRef = useRef(null);
@@ -241,12 +234,11 @@ export default function Catalog() {
 
       <div
         ref={containerRef}
-        className={`
+        className="
           relative
           overflow-hidden
           min-w-0 min-h-0
-          ${dims.isMobile ? 'pl-6' : 'pl-0'}
-        `}
+        "
       >
         <Arrow dir="left"  onClick={() => slideTo(idx - 1)} hidden={!dims.isMobile || idx === 0} />
         <Arrow dir="right" onClick={() => slideTo(idx + 1)} hidden={!dims.isMobile || idx === slides.length - 1} />
@@ -259,9 +251,9 @@ export default function Catalog() {
             will-change-transform
             min-w-0 min-h-0
           `}
-
-          style={{ transform: dims.isMobile ? `translate3d(${-dims.leftPad}px,0,0)` : 'none' }}
+          style={{ transform: 'translate3d(0,0,0)' }}
         >
+          {dims.isMobile && <div style={{ width: LEFT_SPACER, flex: '0 0 auto' }} />}
           <div ref={leftRef}   className={cardWrapClass} style={itemStyle}>
             <Link href={slides[0].href}><CatalogItem title={slides[0].title} src={slides[0].src} /></Link>
           </div>
