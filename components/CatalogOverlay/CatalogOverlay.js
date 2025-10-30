@@ -15,78 +15,58 @@ const categories = [
 export default function CatalogOverlay({ onClose }) {
   const [mounted, setMounted] = useState(false);
   const overlayRef = useRef(null);
-  const scrollYRef = useRef(0);
-  const bodyPrev = useRef(null);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (!mounted) return;
 
-  useEffect(() => {
-    if (!mounted || !overlayRef.current) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const sbw = Math.max(0, window.innerWidth - html.clientWidth);
 
-    scrollYRef.current = window.scrollY || 0;
-    const sbw = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
-    const b = document.body;
-
-    bodyPrev.current = {
-      position: b.style.position,
-      top: b.style.top,
-      left: b.style.left,
-      right: b.style.right,
-      width: b.style.width,
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyPaddingRight: body.style.paddingRight,
     };
 
-    b.style.position = 'fixed';
-    b.style.top = `-${scrollYRef.current}px`;
-    b.style.left = '0';
-    b.style.right = `${sbw}px`;
-    b.style.width = '';
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    if (sbw > 0) body.style.paddingRight = `${sbw}px`;
 
     const el = overlayRef.current;
-    const items = el.querySelectorAll('.catalog-item');
-    const bgs = el.querySelectorAll('.catalog-bg');
-
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    tl.fromTo(el, { opacity: 0, y: '-8%', scale: 0.97 }, { opacity: 1, y: '0%', scale: 1, duration: 0.7 });
-    tl.fromTo(bgs, { scale: 1.06, opacity: 0.8 }, { scale: 1, opacity: 1, duration: 0.7, stagger: 0.08 }, '-=0.4');
-    tl.fromTo(items, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25 }, '-=0.55');
+    if (el) {
+      gsap.fromTo(
+        el,
+        { opacity: 0, yPercent: -6, scale: 0.98 },
+        { opacity: 1, yPercent: 0, scale: 1, duration: 0.5, ease: 'power2.out' }
+      );
+    }
 
     const onEsc = (e) => e.key === 'Escape' && handleClose();
     window.addEventListener('keydown', onEsc);
 
-    const onResize = () => {
-      const w = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
-      b.style.right = `${w}px`;
-    };
-    window.addEventListener('resize', onResize);
-
     return () => {
       window.removeEventListener('keydown', onEsc);
-      window.removeEventListener('resize', onResize);
-
-      if (bodyPrev.current) {
-        b.style.position = bodyPrev.current.position;
-        b.style.top = bodyPrev.current.top;
-        b.style.left = bodyPrev.current.left;
-        b.style.right = bodyPrev.current.right;
-        b.style.width = bodyPrev.current.width;
-      }
-      window.scrollTo(0, scrollYRef.current);
+      html.style.overflow = prev.htmlOverflow;
+      body.style.overflow = prev.bodyOverflow;
+      body.style.paddingRight = prev.bodyPaddingRight;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
   const handleClose = () => {
     const el = overlayRef.current;
     if (!el) return onClose?.();
-    const items = el.querySelectorAll('.catalog-item');
-    const bgs = el.querySelectorAll('.catalog-bg');
-
-    gsap
-      .timeline({ defaults: { ease: 'power3.inOut' }, onComplete: () => onClose?.() })
-      .to(items, { y: -25, opacity: 0, duration: 0.35, stagger: 0.05 }, 0)
-      .to(bgs, { scale: 1.04, opacity: 0.75, duration: 0.4 }, 0)
-      .to(el, { opacity: 0, y: '-6%', scale: 0.97, duration: 0.5 }, '-=0.3');
+    gsap.to(el, {
+      opacity: 0,
+      yPercent: -4,
+      scale: 0.985,
+      duration: 0.35,
+      ease: 'power2.inOut',
+      onComplete: () => onClose?.(),
+    });
   };
 
   if (!mounted) return null;
@@ -94,9 +74,9 @@ export default function CatalogOverlay({ onClose }) {
   return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[9999] bg-black text-white flex flex-col min-h-[100svh]"
-      aria-modal="true"
+      className="fixed inset-0 z-[1000] bg-black text-white flex flex-col min-h-[100svh] overscroll-none touch-none"
       role="dialog"
+      aria-modal="true"
     >
       <div className="z-40 flex items-center justify-center h-16 xlg:h-20 px-4 pt-[env(safe-area-inset-top)] pointer-events-none">
         <h1 className="text-3xl xlg:text-5xl font-bold text-center tracking-tight">Каталог</h1>
@@ -104,8 +84,8 @@ export default function CatalogOverlay({ onClose }) {
 
       <button
         onClick={handleClose}
-        className="absolute top-3 xlg:top-4 right-4 xlg:right-6 text-3xl xlg:text-4xl text-white z-50 p-2 rounded-full bg-black/30 hover:bg-black/50 transition-all duration-300 hover:rotate-90"
         aria-label="Закрити каталог"
+        className="absolute top-3 xlg:top-4 right-4 xlg:right-6 text-3xl xlg:text-4xl text-white z-50 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55 transition"
       >
         <IoClose />
       </button>
@@ -118,17 +98,17 @@ export default function CatalogOverlay({ onClose }) {
             onClick={handleClose}
             className="relative group overflow-hidden flex items-center justify-center flex-1 transition-all duration-700"
           >
-            <div className="absolute inset-0 -z-10 transform-gpu transition-transform duration-700 catalog-bg">
+            <div className="absolute inset-0 -z-10 transform-gpu transition-transform duration-700">
               <Image
                 src={cat.image}
                 alt={cat.title}
                 fill
                 priority
-                className="object-cover brightness-[35%] group-hover:brightness-[55%] group-hover:scale-[1.04] transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+                className="object-cover brightness-[35%] group-hover:brightness-[55%] group-hover:scale-[1.04] transition-all duration-500"
               />
             </div>
 
-            <div className="catalog-item absolute inset-0 flex flex-col items-center justify-center px-4 transition-all duration-500">
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
               <h2 className="text-2xl xlg:text-4xl font-semibold text-center group-hover:scale-105 transition-transform duration-400">
                 {cat.title}
               </h2>
