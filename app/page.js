@@ -1,8 +1,8 @@
+// app/page.jsx
 'use client';
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
 import Header from "@/components/Header/Header";
 import Hero from "@/components/Hero/Hero";
 import Catalog from "@/components/Catalog/Catalog";
@@ -21,35 +21,34 @@ export default function Home() {
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    gsap.ticker.lagSmoothing(1000, 16);
+    gsap.ticker.lagSmoothing(1000, 20);
 
     const ctx = gsap.context(() => {
       gsap.set([heroInnerRef.current, mainInnerRef.current, footerInnerRef.current], { force3D: true, willChange: 'transform' });
-
       gsap.set(heroInnerRef.current, { yPercent: 0, scale: 1 });
       gsap.set(heroTopMaskRef.current, { opacity: 0.06 });
 
       gsap.timeline({
-        scrollTrigger: { trigger: '#hero-wrapper', start: 'top top', end: 'bottom top', scrub: true },
+        scrollTrigger: { trigger: '#hero-wrapper', start: 'top top', end: 'bottom top', scrub: true, fastScrollEnd: true },
         defaults: { ease: 'none' }
       })
       .to(heroInnerRef.current, { yPercent: -2, scale: 0.998 }, 0)
       .to(heroTopMaskRef.current, { opacity: 0.05 }, 0);
 
-      const ENTER_OFFSET_MAIN = -120;
-      gsap.set(mainInnerRef.current, { y: ENTER_OFFSET_MAIN });
+      const ENTER_MAIN = -120;
+      gsap.set(mainInnerRef.current, { y: ENTER_MAIN });
 
       gsap.timeline({
-        scrollTrigger: { trigger: '#main-wrapper', start: 'top bottom', end: 'top top', scrub: true },
+        scrollTrigger: { trigger: '#main-wrapper', start: 'top bottom', end: 'top top', scrub: true, fastScrollEnd: true },
         defaults: { ease: 'none' }
       })
       .to(mainInnerRef.current, { y: 0 }, 0);
 
-      const ENTER_OFFSET_FOOTER = 120;
-      gsap.set(footerInnerRef.current, { y: ENTER_OFFSET_FOOTER });
+      const ENTER_FOOTER = 120;
+      gsap.set(footerInnerRef.current, { y: ENTER_FOOTER });
 
       gsap.timeline({
-        scrollTrigger: { trigger: '#footer-wrapper', start: 'top bottom', end: 'top top', scrub: true },
+        scrollTrigger: { trigger: '#footer-wrapper', start: 'top bottom', end: 'top top', scrub: true, fastScrollEnd: true },
         defaults: { ease: 'none' }
       })
       .to(footerInnerRef.current, { y: 0 }, 0);
@@ -61,13 +60,12 @@ export default function Home() {
   return (
     <>
       <Header />
-
       <main className="bg-[#171718]">
         <section id="hero-wrapper" className="relative">
           <div className="h-[100svh]">
             <div className="sticky top-0 h-[100svh] z-20 overflow-hidden">
               <div className="relative h-full">
-                <div ref={heroInnerRef} className="h-full">
+                <div ref={heroInnerRef} className="h-full will-change-transform transform-gpu">
                   <Hero />
                 </div>
                 <div ref={heroTopMaskRef} className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#171718] to-transparent" />
@@ -77,7 +75,7 @@ export default function Home() {
         </section>
 
         <section id="main-wrapper" className="relative z-[10]">
-          <div ref={mainInnerRef}>
+          <div ref={mainInnerRef} className="will-change-transform transform-gpu">
             <Catalog />
             <Features />
           </div>
@@ -85,7 +83,7 @@ export default function Home() {
       </main>
 
       <section id="footer-wrapper" className="relative z-0 -mt-px">
-        <div ref={footerInnerRef}>
+        <div ref={footerInnerRef} className="will-change-transform transform-gpu">
           <Footer />
         </div>
       </section>

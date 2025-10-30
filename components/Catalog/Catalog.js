@@ -4,17 +4,19 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import CatalogItem from '../CatalogItem/CatalogItem';
 
 const slides = [
-  { href: '/ovens',          title: 'Плити',               src: '/assets/images/ovens.jpg' },
-  { href: '/gas-convectors', title: 'Газові конвектори',   src: '/assets/images/convectors.jpg' },
-  { href: '/e-ovens',        title: 'Електричні духовки',  src: '/assets/images/eovens.jpg' },
+  { href: '/ovens',          title: 'Плити',              src: '/assets/images/ovens.jpg' },
+  { href: '/gas-convectors', title: 'Газові конвектори',  src: '/assets/images/convectors.jpg' },
+  { href: '/e-ovens',        title: 'Електричні духовки', src: '/assets/images/eovens.jpg' },
 ];
 
 const MOBILE_MAX = 1080;
 const GAP = 16;
-const LEFT_SPACER = 24;
+const LEFT_PAD = 24;
 
 export default function Catalog() {
   const containerRef = useRef(null);
+  const trackRef = useRef(null);
+
   const [isMobile, setIsMobile] = useState(false);
   const [idx, setIdx] = useState(0);
   const [itemW, setItemW] = useState(0);
@@ -29,9 +31,9 @@ export default function Catalog() {
 
   const recalc = () => {
     if (!containerRef.current) return;
-    const w = containerRef.current.clientWidth;
-    const target = Math.min(620, Math.max(260, Math.round(w * 0.88)));
-    setItemW(target);
+    const vw = containerRef.current.clientWidth;
+    setItemW(Math.min(620, Math.max(260, Math.round(vw * 0.88))));
+    requestAnimationFrame(() => translateTo(idx, false));
   };
 
   useEffect(() => {
@@ -46,47 +48,87 @@ export default function Catalog() {
     containerRef.current.style.touchAction = 'pan-y';
   }, []);
 
-  const scrollToIndex = (to) => {
-    if (!containerRef.current) return;
+  const translateTo = (to, animate = true) => {
+    if (!trackRef.current) return;
     const n = Math.max(0, Math.min(to, slides.length - 1));
-    const left = LEFT_SPACER + n * (itemW + GAP);
-    containerRef.current.scrollTo({ left, behavior: 'smooth' });
     setIdx(n);
+    const x = -(n * (itemW + GAP));
+    trackRef.current.style.transition = animate ? 'transform 420ms cubic-bezier(.2,.8,.2,1)' : 'none';
+    trackRef.current.style.transform = `translate3d(${x}px,0,0)`;
   };
 
   useEffect(() => {
-    if (!isMobile || !containerRef.current) return;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const el = containerRef.current;
-        const pos = Math.max(0, el.scrollLeft - LEFT_SPACER);
-        const step = itemW + GAP;
-        const near = Math.round(pos / step);
-        const clamped = Math.max(0, Math.min(near, slides.length - 1));
-        if (clamped !== idx) setIdx(clamped);
-      });
+    if (!isMobile || !containerRef.current || !trackRef.current) return;
+
+    let startX = 0;
+    let delta = 0;
+    let dragging = false;
+
+    const area = containerRef.current;
+
+    const onDown = e => {
+      dragging = true;
+      startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      delta = 0;
+      trackRef.current.style.transition = 'none';
     };
-    const el = containerRef.current;
-    el.addEventListener('scroll', onScroll, { passive: true });
+
+    const onMove = e => {
+      if (!dragging) return;
+      const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      delta = x - startX;
+      const base = -(idx * (itemW + GAP));
+      const cur = base + delta;
+      trackRef.current.style.transform = `translate3d(${cur}px,0,0)`;
+    };
+
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      const threshold = 50;
+      if (delta <= -threshold) translateTo(idx + 1, true);
+      else if (delta >= threshold) translateTo(idx - 1, true);
+      else translateTo(idx, true);
+    };
+
+    area.addEventListener('pointerdown', onDown, { passive: true });
+    area.addEventListener('pointermove', onMove, { passive: true });
+    area.addEventListener('pointerup', onUp, { passive: true });
+    area.addEventListener('pointercancel', onUp, { passive: true });
+    area.addEventListener('touchstart', onDown, { passive: true });
+    area.addEventListener('touchmove', onMove, { passive: true });
+    area.addEventListener('touchend', onUp, { passive: true });
+    area.addEventListener('touchcancel', onUp, { passive: true });
+
     return () => {
-      el.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(raf);
+      area.removeEventListener('pointerdown', onDown);
+      area.removeEventListener('pointermove', onMove);
+      area.removeEventListener('pointerup', onUp);
+      area.removeEventListener('pointercancel', onUp);
+      area.removeEventListener('touchstart', onDown);
+      area.removeEventListener('touchmove', onMove);
+      area.removeEventListener('touchend', onUp);
+      area.removeEventListener('touchcancel', onUp);
     };
   }, [isMobile, itemW, idx]);
+
+  useEffect(() => {
+    if (!isMobile && trackRef.current) {
+      trackRef.current.style.transition = 'none';
+      trackRef.current.style.transform = 'translate3d(0,0,0)';
+      if (idx !== 0) setIdx(0);
+    }
+  }, [isMobile]);
 
   const itemStyle = useMemo(
     () => (isMobile ? { width: `${itemW}px`, flex: '0 0 auto' } : undefined),
     [isMobile, itemW]
   );
-  const cardWrapClass = isMobile
-    ? 'shrink-0'
-    : 'shrink basis-[clamp(360px,34vw,720px)] max-w-[720px]';
+  const cardWrapClass = isMobile ? 'shrink-0' : 'shrink basis-[clamp(360px,34vw,720px)] max-w-[720px]';
 
   const Arrow = ({ dir, disabled }) => (
     <button
-      onClick={() => scrollToIndex(idx + (dir === 'left' ? -1 : 1))}
+      onClick={() => translateTo(idx + (dir === 'left' ? -1 : 1), true)}
       disabled={disabled}
       aria-label={dir === 'left' ? 'Назад' : 'Далі'}
       className={`
@@ -119,26 +161,20 @@ export default function Catalog() {
 
         <div
           ref={containerRef}
-          className={`${isMobile ? 'overflow-x-auto overflow-y-visible snap-x snap-mandatory' : 'overflow-hidden'} min-w-0`}
-          style={{
-            WebkitOverflowScrolling: 'touch',
-            msOverflowStyle: 'none',
-            scrollbarWidth: 'none'
-          }}
+          className={`${isMobile ? 'overflow-hidden pl-6' : 'overflow-hidden pl-0'} min-w-0`}
         >
-          <style jsx>{`
-            div::-webkit-scrollbar { display: none; height: 0; width: 0; }
-          `}</style>
-
-          <div className={`flex items-stretch ${isMobile ? 'gap-4 justify-start' : 'gap-8 justify-center'} min-w-0`}>
-            {isMobile && <div style={{ width: LEFT_SPACER, flex: '0 0 auto' }} />}
-            <div className={`${cardWrapClass} ${isMobile ? 'snap-start' : ''}`} style={itemStyle}>
+          <div
+            ref={trackRef}
+            className={`flex items-stretch ${isMobile ? 'gap-4 justify-start' : 'gap-8 justify-center'} will-change-transform transform-gpu`}
+            style={{ transform: 'translate3d(0,0,0)' }}
+          >
+            <div className={cardWrapClass} style={itemStyle}>
               <Link href={slides[0].href}><CatalogItem title={slides[0].title} src={slides[0].src} /></Link>
             </div>
-            <div className={`${cardWrapClass} ${isMobile ? 'snap-start' : ''}`} style={itemStyle}>
+            <div className={cardWrapClass} style={itemStyle}>
               <Link href={slides[1].href}><CatalogItem title={slides[1].title} src={slides[1].src} /></Link>
             </div>
-            <div className={`${cardWrapClass} ${isMobile ? 'snap-start' : ''}`} style={itemStyle}>
+            <div className={cardWrapClass} style={itemStyle}>
               <Link href={slides[2].href}><CatalogItem title={slides[2].title} src={slides[2].src} /></Link>
             </div>
           </div>
