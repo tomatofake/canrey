@@ -40,20 +40,25 @@ export default function Catalog() {
   const recalc = () => {
     if (!containerRef.current) return;
     const vw = containerRef.current.clientWidth;
-    const itemW = Math.min(640, Math.max(260, Math.round(vw * 0.88)));
+
+    const itemW = Math.min(620, Math.max(260, Math.round(vw * 0.88)));
     const gap = 16;
     const leftPad = 24;
     const rightPad = 0;
+
     const contentWidth = leftPad + slides.length * (itemW + gap) - gap + rightPad;
     const maxOffset = Math.max(0, contentWidth - vw);
+
     setDims(d => ({ ...d, vw, itemW, gap, leftPad, maxOffset }));
+
     requestAnimationFrame(() => slideTo(idx, { animate: false }));
   };
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.style.touchAction = 'pan-y';
-    containerRef.current.style.webkitTapHighlightColor = 'transparent';
+    if (containerRef.current) {
+      containerRef.current.style.touchAction = 'pan-y';
+    }
+
     if (dims.isMobile) {
       recalc();
       window.addEventListener('resize', recalc);
@@ -62,7 +67,6 @@ export default function Catalog() {
       if (trackRef.current) {
         trackRef.current.style.transition = 'none';
         trackRef.current.style.transform  = 'none';
-        trackRef.current.style.willChange = 'auto';
       }
       if (idx !== 0) setIdx(0);
     }
@@ -74,29 +78,33 @@ export default function Catalog() {
     const n = clamp(to, 0, slides.length - 1);
     setIdx(n);
     if (!trackRef.current || !dims.isMobile) return;
+
     const { itemW, gap, leftPad, maxOffset } = dims;
+
     const baseOffset = leftPad + n * (itemW + gap);
     const targetOffset = Math.min(baseOffset, maxOffset);
+
     const x = -targetOffset;
-    trackRef.current.style.transition = animate ? 'transform 420ms cubic-bezier(.2,.8,.2,1)' : 'none';
+    trackRef.current.style.transition = animate
+      ? 'transform 420ms cubic-bezier(.2,.8,.2,1)'
+      : 'none';
     trackRef.current.style.transform = `translate3d(${x}px,0,0)`;
   };
 
   useEffect(() => {
     if (!dims.isMobile || !containerRef.current || !trackRef.current) return;
 
-    let startX = 0, startY = 0;
-    let deltaX = 0, dragging = false, lockedAxis = null;
+    let startX = 0;
+    let delta  = 0;
+    let dragging = false;
 
     const area = containerRef.current;
 
     const onDown = (e) => {
       dragging = true;
-      lockedAxis = null;
-      const t = 'touches' in e ? e.touches[0] : e;
-      startX = t.clientX; startY = t.clientY; deltaX = 0;
+      startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      delta = 0;
       trackRef.current.style.transition = 'none';
-      trackRef.current.style.willChange = 'transform';
       if ('pointerId' in e && area.setPointerCapture) {
         try { area.setPointerCapture(e.pointerId); } catch {}
       }
@@ -104,42 +112,33 @@ export default function Catalog() {
 
     const onMove = (e) => {
       if (!dragging) return;
-      const t = 'touches' in e ? e.touches[0] : e;
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
+      const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      delta = x - startX;
 
-      if (!lockedAxis) {
-        lockedAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      }
-      if (lockedAxis === 'x') {
-        e.preventDefault();
-        deltaX = dx;
-        const { itemW, gap, leftPad, maxOffset } = dims;
-        const base = leftPad + idx * (itemW + gap);
-        let currentOffset = base - deltaX;
-        currentOffset = Math.max(0, Math.min(currentOffset, maxOffset));
-        trackRef.current.style.transform = `translate3d(${-currentOffset}px,0,0)`;
-      }
+      const { itemW, gap, leftPad, maxOffset } = dims;
+      const base = leftPad + idx * (itemW + gap);
+      let currentOffset = base - delta;
+      currentOffset = Math.max(0, Math.min(currentOffset, maxOffset));
+      trackRef.current.style.transform = `translate3d(${-currentOffset}px,0,0)`;
     };
 
     const onUp = () => {
       if (!dragging) return;
       dragging = false;
-      trackRef.current.style.willChange = 'auto';
       const threshold = 50;
-      if (deltaX <= -threshold) slideTo(idx + 1);
-      else if (deltaX >= threshold) slideTo(idx - 1);
+      if (delta <= -threshold) slideTo(idx + 1);
+      else if (delta >= threshold) slideTo(idx - 1);
       else slideTo(idx, { animate: true });
     };
 
     area.addEventListener('pointerdown', onDown, { passive: true });
-    area.addEventListener('pointermove', onMove, { passive: false });
+    area.addEventListener('pointermove', onMove, { passive: true });
     area.addEventListener('pointerup', onUp,   { passive: true });
     area.addEventListener('pointercancel', onUp, { passive: true });
     area.addEventListener('pointerleave', onUp,  { passive: true });
 
     area.addEventListener('touchstart', onDown, { passive: true });
-    area.addEventListener('touchmove',  onMove, { passive: false });
+    area.addEventListener('touchmove',  onMove, { passive: true });
     area.addEventListener('touchend',   onUp,   { passive: true });
     area.addEventListener('touchcancel',onUp,   { passive: true });
 
@@ -149,6 +148,7 @@ export default function Catalog() {
       area.removeEventListener('pointerup', onUp);
       area.removeEventListener('pointercancel', onUp);
       area.removeEventListener('pointerleave', onUp);
+
       area.removeEventListener('touchstart', onDown);
       area.removeEventListener('touchmove', onMove);
       area.removeEventListener('touchend', onUp);
@@ -166,13 +166,17 @@ export default function Catalog() {
         gsap.fromTo(
           el,
           { opacity: 0, x, y },
-          { opacity: 1, x: 0, y: 0, duration: 0.9, ease: 'power2.out', immediateRender: false,
-            scrollTrigger: { trigger: el, start: 'top 80%' } }
+          {
+            opacity: 1, x: 0, y: 0,
+            duration: 1.1, ease: 'power2.out',
+            immediateRender: false,
+            scrollTrigger: { trigger: el, start: 'top 80%' }
+          }
         );
       };
       animateFrom(leftRef.current,  -120, 0);
-      animateFrom(centerRef.current,   0, 120);
-      animateFrom(rightRef.current, 120, 0);
+      animateFrom(centerRef.current,   0,  120);
+      animateFrom(rightRef.current, 120,  0);
     });
     return () => mm.revert();
   }, []);
@@ -204,10 +208,9 @@ export default function Catalog() {
     () => (dims.isMobile ? { width: `${dims.itemW}px` } : undefined),
     [dims.isMobile, dims.itemW]
   );
-
   const cardWrapClass = dims.isMobile
     ? 'shrink-0'
-    : 'shrink basis-[clamp(380px,34vw,720px)] max-w-[720px]';
+    : 'shrink basis-[clamp(360px,34vw,720px)] max-w-[720px]';
 
   return (
     <section className="flex flex-col mx-3 lg:mx-10 my-[60px] lg:my-[120px]">
@@ -221,7 +224,6 @@ export default function Catalog() {
           relative
           overflow-hidden
           min-w-0 min-h-0
-          overscroll-contain
           ${dims.isMobile ? 'pl-6' : 'pl-0'}
         `}
       >
@@ -233,6 +235,7 @@ export default function Catalog() {
           className={`
             flex items-stretch
             ${dims.isMobile ? 'gap-4 justify-start' : 'gap-8 justify-center'}
+            will-change-transform
             min-w-0 min-h-0
           `}
           style={{ transform: 'translate3d(0,0,0)' }}

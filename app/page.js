@@ -1,115 +1,110 @@
-'use client';
+'use client'
+import { useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Header from "@/components/Header/Header"
+import Hero from "@/components/Hero/Hero"
+import Catalog from "@/components/Catalog/Catalog"
+import Features from "@/components/Features/Features"
+import Footer from "@/components/Footer/Footer"
 
-import Header from '@/components/Header/Header';
-import Hero from '@/components/Hero/Hero';
-import Catalog from '@/components/Catalog/Catalog';
-import Features from '@/components/Features/Features';
-import Footer from '@/components/Footer/Footer';
-
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger)
 
 export default function Home() {
-  const heroInnerRef   = useRef(null);
-  const mainInnerRef   = useRef(null);
-  const footerInnerRef = useRef(null);
+  const heroInnerRef   = useRef(null)
+  const mainInnerRef   = useRef(null)
+  const footerInnerRef = useRef(null)
+
+  const heroTopMaskRef = useRef(null)
 
   useEffect(() => {
     const reduce =
       typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return;
-
-    gsap.ticker.lagSmoothing(500, 16);
-    ScrollTrigger.config({
-      ignoreMobileResize: true,
-      autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load'
-    });
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return
 
     const ctx = gsap.context(() => {
-      const setHeroY   = gsap.quickSetter(heroInnerRef.current, 'yPercent');
-      const setHeroSc  = gsap.quickSetter(heroInnerRef.current, 'scale');
-      const setMainY   = gsap.quickSetter(mainInnerRef.current, 'y');
-      const setFooterY = gsap.quickSetter(footerInnerRef.current, 'y');
-
       gsap.set([heroInnerRef.current, mainInnerRef.current, footerInnerRef.current], {
         force3D: true,
         willChange: 'transform'
-      });
+      })
 
-      gsap.set(heroInnerRef.current, { yPercent: 0, scale: 1 });
+      gsap.set(heroInnerRef.current, { yPercent: 0, scale: 1, filter: 'blur(0px)', opacity: 1 })
+      gsap.set(heroTopMaskRef.current, { opacity: 0.06 })
 
-      ScrollTrigger.create({
-        trigger: '#hero-wrapper',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 0.2,
-        anticipatePin: 1,
-        fastScrollEnd: true,
-        onUpdate: (self) => {
-          const p = self.progress;
-          setHeroY(gsap.utils.interpolate(0, -3, p));
-          setHeroSc(gsap.utils.interpolate(1, 0.996, p));
-        }
-      });
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: '#hero-wrapper',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true
+        },
+        defaults: { ease: 'none' }
+      })
+      .to(heroInnerRef.current, {
+        yPercent: -3,
+        scale: 0.995,
+        filter: 'blur(0.3px)',
+        opacity: 0.985
+      }, 0)
+      .to(heroTopMaskRef.current, { opacity: 0.05 }, 0)
 
-      const ENTER_MAIN = -140;
-      gsap.set(mainInnerRef.current, { y: ENTER_MAIN });
+      const ENTER_OFFSET_MAIN = -200
+      gsap.set(mainInnerRef.current, { y: ENTER_OFFSET_MAIN, opacity: 0.94, filter: 'blur(0.3px)' })
 
-      ScrollTrigger.create({
-        trigger: '#main-wrapper',
-        start: 'top bottom',
-        end: 'top top',
-        scrub: 0.2,
-        anticipatePin: 1,
-        fastScrollEnd: true,
-        onUpdate: (self) => {
-          const p = self.progress;
-          setMainY(gsap.utils.interpolate(ENTER_MAIN, 0, p));
-        }
-      });
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: '#main-wrapper',
+          start: 'top bottom',
+          end: 'top top',
+          scrub: true
+        },
+        defaults: { ease: 'none' }
+      })
+      .to(mainInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
 
-      const ENTER_FOOTER = 120;
-      gsap.set(footerInnerRef.current, { y: ENTER_FOOTER });
+      const ENTER_OFFSET_FOOTER = 140
+      gsap.set(footerInnerRef.current, { y: ENTER_OFFSET_FOOTER, opacity: 0.96, filter: 'blur(0.2px)' })
 
-      ScrollTrigger.create({
-        trigger: '#footer-wrapper',
-        start: 'top bottom',
-        end: 'top top',
-        scrub: 0.2,
-        anticipatePin: 1,
-        fastScrollEnd: true,
-        onUpdate: (self) => {
-          const p = self.progress;
-          setFooterY(gsap.utils.interpolate(ENTER_FOOTER, 0, p));
-        }
-      });
-    });
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: '#footer-wrapper',
+          start: 'top bottom',
+          end: 'top top',
+          scrub: true
+        },
+        defaults: { ease: 'none' }
+      })
+      .to(footerInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
+    })
 
-    return () => ctx.revert();
-  }, []);
+    return () => ctx.revert()
+  }, [])
 
   return (
     <>
       <Header />
 
       <main className="bg-[#171718]">
-        <section id="hero-wrapper" className="relative bg-[#171718]">
-          <div className="h-[100dvh] min-h-[100svh]">
-            <div className="sticky top-0 h-[100dvh] min-h-[100svh] z-10 overflow-hidden">
+        <section id="hero-wrapper" className="relative">
+          <div className="h-[100svh]">
+            <div className="sticky top-0 h-[100svh] z-20 overflow-hidden">
               <div className="relative h-full">
-                <div ref={heroInnerRef} className="h-full">
+                <div ref={heroInnerRef} className="h-full border-">
                   <Hero />
                 </div>
+                <div
+                  ref={heroTopMaskRef}
+                  className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#171718] to-transparent"
+                />
               </div>
             </div>
           </div>
         </section>
 
-        <section id="main-wrapper" className="relative z-[5] bg-[#171718]">
+        <section id="main-wrapper" className="relative z-[10]">
           <div ref={mainInnerRef}>
             <Catalog />
             <Features />
@@ -117,11 +112,11 @@ export default function Home() {
         </section>
       </main>
 
-      <section id="footer-wrapper" className="relative z-0 bg-[#171718]">
+      <section id="footer-wrapper" className="relative z-0 -mt-px">
         <div ref={footerInnerRef}>
           <Footer />
         </div>
       </section>
     </>
-  );
+  )
 }
