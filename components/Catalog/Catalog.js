@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import CatalogItem from '../CatalogItem/CatalogItem';
@@ -29,13 +29,34 @@ export default function Catalog() {
     maxOffset: 0,
   });
 
+  useLayoutEffect(() => {
+    const isMob = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`).matches;
+    setDims(d => ({ ...d, isMobile: isMob }));
+
+    if (isMob && trackRef.current) {
+      trackRef.current.style.willChange = 'transform';
+      trackRef.current.style.transform = `translate3d(${-24}px,0,0)`;
+      trackRef.current.style.transition = 'none';
+    }
+  }, []);
+
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`);
-    const apply = () => setDims(d => ({ ...d, isMobile: mql.matches }));
-    apply();
-    mql.addEventListener('change', apply);
-    return () => mql.removeEventListener('change', apply);
-  }, []);
+    const onChange = () => {
+      const isMob = mql.matches;
+      setDims(d => ({ ...d, isMobile: isMob }));
+      if (!isMob && trackRef.current) {
+        trackRef.current.style.transition = 'none';
+        trackRef.current.style.transform  = 'none';
+        if (idx !== 0) setIdx(0);
+      } else if (isMob && trackRef.current) {
+        trackRef.current.style.transition = 'none';
+        trackRef.current.style.transform  = `translate3d(${-dims.leftPad}px,0,0)`;
+      }
+    };
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [idx, dims.leftPad]);
 
   const recalc = () => {
     if (!containerRef.current) return;
@@ -61,8 +82,9 @@ export default function Catalog() {
 
     if (dims.isMobile) {
       recalc();
-      window.addEventListener('resize', recalc);
-      return () => window.removeEventListener('resize', recalc);
+      const onResize = () => recalc();
+      window.addEventListener('resize', onResize);
+      return () => window.removeEventListener('resize', onResize);
     } else {
       if (trackRef.current) {
         trackRef.current.style.transition = 'none';
@@ -80,11 +102,10 @@ export default function Catalog() {
     if (!trackRef.current || !dims.isMobile) return;
 
     const { itemW, gap, leftPad, maxOffset } = dims;
-
     const baseOffset = leftPad + n * (itemW + gap);
     const targetOffset = Math.min(baseOffset, maxOffset);
-
     const x = -targetOffset;
+
     trackRef.current.style.transition = animate
       ? 'transform 420ms cubic-bezier(.2,.8,.2,1)'
       : 'none';
@@ -154,7 +175,7 @@ export default function Catalog() {
       area.removeEventListener('touchend', onUp);
       area.removeEventListener('touchcancel', onUp);
     };
-  }, [dims.isMobile, dims.itemW, dims.maxOffset, idx]);
+  }, [dims.isMobile, dims.itemW, dims.maxOffset, idx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const leftRef = useRef(null);
   const centerRef = useRef(null);
@@ -238,7 +259,8 @@ export default function Catalog() {
             will-change-transform
             min-w-0 min-h-0
           `}
-          style={{ transform: 'translate3d(0,0,0)' }}
+
+          style={{ transform: dims.isMobile ? `translate3d(${-dims.leftPad}px,0,0)` : 'none' }}
         >
           <div ref={leftRef}   className={cardWrapClass} style={itemStyle}>
             <Link href={slides[0].href}><CatalogItem title={slides[0].title} src={slides[0].src} /></Link>
