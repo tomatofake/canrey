@@ -37,4 +37,5 @@ html, body {
   .ios-no-filter { filter: none !important; }
   .ios-no-scale { transform: none !important; }
   .ios-sticky-open { overflow: visible !important; }
+  body { -webkit-font-smoothing: antialiased; }
 }
