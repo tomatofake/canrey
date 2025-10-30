@@ -15,11 +15,9 @@ const LEFT_SPACER = 24;
 
 export default function Catalog() {
   const containerRef = useRef(null);
-  const spacerRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const [idx, setIdx] = useState(0);
   const [itemW, setItemW] = useState(0);
-  const [vw, setVw] = useState(0);
 
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`);
@@ -32,7 +30,6 @@ export default function Catalog() {
   const recalc = () => {
     if (!containerRef.current) return;
     const w = containerRef.current.clientWidth;
-    setVw(w);
     const target = Math.min(620, Math.max(260, Math.round(w * 0.88)));
     setItemW(target);
   };
@@ -44,24 +41,27 @@ export default function Catalog() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  useEffect(() => {
+    if (!containerRef.current) return;
+    containerRef.current.style.touchAction = 'pan-y';
+  }, []);
+
   const scrollToIndex = (to) => {
     if (!containerRef.current) return;
     const n = Math.max(0, Math.min(to, slides.length - 1));
-    const spacer = isMobile ? LEFT_SPACER : 0;
-    const left = spacer + n * (itemW + GAP);
+    const left = LEFT_SPACER + n * (itemW + GAP);
     containerRef.current.scrollTo({ left, behavior: 'smooth' });
     setIdx(n);
   };
 
   useEffect(() => {
-    if (!containerRef.current || !isMobile) return;
+    if (!isMobile || !containerRef.current) return;
     let raf = 0;
     const onScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         const el = containerRef.current;
-        const spacer = LEFT_SPACER;
-        const pos = Math.max(0, el.scrollLeft - spacer);
+        const pos = Math.max(0, el.scrollLeft - LEFT_SPACER);
         const step = itemW + GAP;
         const near = Math.round(pos / step);
         const clamped = Math.max(0, Math.min(near, slides.length - 1));
@@ -119,40 +119,27 @@ export default function Catalog() {
 
         <div
           ref={containerRef}
-          className={`
-            ${isMobile
-              ? 'overflow-x-auto overflow-y-visible snap-x snap-mandatory'
-              : 'overflow-hidden'}
-            scrollbar-none
-            min-w-0
-          `}
-          style={{ WebkitOverflowScrolling: 'touch' }}
+          className={`${isMobile ? 'overflow-x-auto overflow-y-visible snap-x snap-mandatory' : 'overflow-hidden'} min-w-0`}
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none'
+          }}
         >
-          <div
-            className={`
-              flex items-stretch
-              ${isMobile ? 'gap-4 justify-start' : 'gap-8 justify-center'}
-              min-w-0
-            `}
-          >
-            {isMobile && <div ref={spacerRef} style={{ width: LEFT_SPACER, flex: '0 0 auto' }} />}
+          <style jsx>{`
+            div::-webkit-scrollbar { display: none; height: 0; width: 0; }
+          `}</style>
 
+          <div className={`flex items-stretch ${isMobile ? 'gap-4 justify-start' : 'gap-8 justify-center'} min-w-0`}>
+            {isMobile && <div style={{ width: LEFT_SPACER, flex: '0 0 auto' }} />}
             <div className={`${cardWrapClass} ${isMobile ? 'snap-start' : ''}`} style={itemStyle}>
-              <Link href={slides[0].href}>
-                <CatalogItem title={slides[0].title} src={slides[0].src} />
-              </Link>
+              <Link href={slides[0].href}><CatalogItem title={slides[0].title} src={slides[0].src} /></Link>
             </div>
-
             <div className={`${cardWrapClass} ${isMobile ? 'snap-start' : ''}`} style={itemStyle}>
-              <Link href={slides[1].href}>
-                <CatalogItem title={slides[1].title} src={slides[1].src} />
-              </Link>
+              <Link href={slides[1].href}><CatalogItem title={slides[1].title} src={slides[1].src} /></Link>
             </div>
-
             <div className={`${cardWrapClass} ${isMobile ? 'snap-start' : ''}`} style={itemStyle}>
-              <Link href={slides[2].href}>
-                <CatalogItem title={slides[2].title} src={slides[2].src} />
-              </Link>
+              <Link href={slides[2].href}><CatalogItem title={slides[2].title} src={slides[2].src} /></Link>
             </div>
           </div>
         </div>
