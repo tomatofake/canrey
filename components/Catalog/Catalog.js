@@ -8,9 +8,9 @@ import CatalogItem from '../CatalogItem/CatalogItem';
 gsap.registerPlugin(ScrollTrigger);
 
 const slides = [
-  { href: '/ovens',          title: 'Плити',               src: '/assets/images/ovens.jpg' },
-  { href: '/gas-convectors', title: 'Газові конвектори',   src: '/assets/images/convectors.jpg' },
-  { href: '/e-ovens',        title: 'Електричні духовки',  src: '/assets/images/eovens.jpg' },
+  { href: '/ovens',          title: 'Плити',              src: '/assets/images/ovens.jpg' },
+  { href: '/gas-convectors', title: 'Газові конвектори',  src: '/assets/images/convectors.jpg' },
+  { href: '/e-ovens',        title: 'Електричні духовки', src: '/assets/images/eovens.jpg' },
 ];
 
 const MOBILE_MAX = 1080;
@@ -24,7 +24,7 @@ export default function Catalog() {
     vw: 0,
     itemW: 0,
     gap: 16,
-    leftPad: 24,
+    leftPad: 9,
     isMobile: false,
     maxOffset: 0,
   });
@@ -44,20 +44,17 @@ export default function Catalog() {
     const itemW = Math.min(620, Math.max(260, Math.round(vw * 0.88)));
     const gap = 16;
     const leftPad = 9;
-    const rightPad = 0;
+    const rightPad = 9;
 
     const contentWidth = leftPad + slides.length * (itemW + gap) - gap + rightPad;
     const maxOffset = Math.max(0, contentWidth - vw);
 
     setDims(d => ({ ...d, vw, itemW, gap, leftPad, maxOffset }));
-
     requestAnimationFrame(() => slideTo(idx, { animate: false }));
   };
 
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.style.touchAction = 'pan-y';
-    }
+    if (containerRef.current) containerRef.current.style.touchAction = 'pan-y';
 
     if (dims.isMobile) {
       recalc();
@@ -80,11 +77,10 @@ export default function Catalog() {
     if (!trackRef.current || !dims.isMobile) return;
 
     const { itemW, gap, leftPad, maxOffset } = dims;
-
     const baseOffset = leftPad + n * (itemW + gap);
     const targetOffset = Math.min(baseOffset, maxOffset);
-
     const x = -targetOffset;
+
     trackRef.current.style.transition = animate
       ? 'transform 420ms cubic-bezier(.2,.8,.2,1)'
       : 'none';
@@ -221,10 +217,8 @@ export default function Catalog() {
       <div
         ref={containerRef}
         className={`
-          relative
-          overflow-hidden
-          min-w-0 min-h-0
-          ${dims.isMobile ? 'pl-3' : 'pl-0'}
+          relative overflow-hidden min-w-0 min-h-0
+          ${dims.isMobile ? 'pl-3 pr-3' : 'pl-0 pr-0'}
         `}
       >
         <Arrow dir="left"  onClick={() => slideTo(idx - 1)} hidden={!dims.isMobile || idx === 0} />
@@ -235,10 +229,14 @@ export default function Catalog() {
           className={`
             flex items-stretch
             ${dims.isMobile ? 'gap-4 justify-start' : 'gap-8 justify-center'}
-            will-change-transform
-            min-w-0 min-h-0
+            min-w-0 min-h-0 will-change-transform
           `}
-          style={{ transform: 'translate3d(0,0,0)' }}
+          style={{
+            transform: 'translate3d(0,0,0)',
+            willChange: 'transform',
+            WebkitTransform: 'translate3d(0,0,0)',
+            backfaceVisibility: 'hidden'
+          }}
         >
           <div ref={leftRef}   className={cardWrapClass} style={itemStyle}>
             <Link href={slides[0].href}><CatalogItem title={slides[0].title} src={slides[0].src} /></Link>

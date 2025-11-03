@@ -12,15 +12,19 @@ const CatalogItem = ({ title, src, className }) => {
         aspect-[10/9] xlg:aspect-[5/6]
         bg-black/5 shadow-[0_10px_30px_rgba(0,0,0,0.10)]
         ring-1 ring-black/5
-        [-webkit-mask-image:radial-gradient(#fff,#000)]
+        xlg:[-webkit-mask-image:radial-gradient(#fff,#000)]
         touch-manipulation
+        [isolation:isolate]
+        [contain:layout_paint]
+        [transform:translateZ(0)]
+        [backface-visibility:hidden]
         `,
         className
       )}
       tabIndex={0}
       aria-label={title}
     >
-      <div className="absolute inset-0 overflow-hidden rounded-2xl will-change-transform">
+      <div className="absolute inset-0 overflow-hidden rounded-2xl will-change-transform [transform:translateZ(0)] [backface-visibility:hidden]">
         <Image
           src={src}
           alt={title}
@@ -33,8 +37,8 @@ const CatalogItem = ({ title, src, className }) => {
             [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
             transform-gpu will-change-transform
             select-none pointer-events-none
-            group-active:scale-[1.02]
             xlg:group-hover:scale-[1.05] xlg:group-focus:scale-[1.05]
+            [backface-visibility:hidden]
           "
           priority={false}
         />
@@ -43,26 +47,25 @@ const CatalogItem = ({ title, src, className }) => {
           className="
             absolute inset-0 z-10 pointer-events-none
             bg-black/35
-            transition-opacity duration-700
-            opacity-95
-            group-active:opacity-85
+            opacity-100
+            xlg:transition-opacity xlg:duration-700
             xlg:opacity-100 xlg:group-hover:opacity-90 xlg:group-focus:opacity-90
+            will-change-opacity
+            [transform:translateZ(0)] [backface-visibility:hidden]
           "
         />
 
         <div
           className="
-            pointer-events-none absolute z-20
+            hidden xlg:block pointer-events-none absolute z-20
             -top-[20%] -left-[35%] h-[140%] w-[70%] rotate-[18deg]
             bg-gradient-to-r from-transparent via-white/70 to-transparent
             mix-blend-overlay blur-[8px]
-            opacity-0
+            opacity-20 translate-x-0
             transition-all duration-1000 ease-out
-            translate-x-0
-            hidden xlg:block
-            xlg:opacity-20
             xlg:group-hover:opacity-90 xlg:group-hover:translate-x-[180%]
             xlg:group-focus:opacity-90 xlg:group-focus:translate-x-[180%]
+            [transform:translateZ(0)] [backface-visibility:hidden]
           "
         />
       </div>
@@ -73,13 +76,11 @@ const CatalogItem = ({ title, src, className }) => {
             text-white font-semibold tracking-tight
             text-2xl sm:text-3xl md:text-4xl
             drop-shadow-[0_4px_18px_rgba(0,0,0,0.55)]
-            transition-all duration-600
-            translate-y-0 opacity-100
-            group-active:scale-[1.01]
+            select-none
+            xlg:transition-all xlg:duration-600
             xlg:translate-y-1 xlg:opacity-95
             xlg:group-hover:translate-y-0 xlg:group-hover:opacity-100
             xlg:group-focus:translate-y-0 xlg:group-focus:opacity-100
-            select-none
           "
         >
           {title}
@@ -90,7 +91,7 @@ const CatalogItem = ({ title, src, className }) => {
         className="
           pointer-events-none absolute inset-0 z-30
           ring-1 ring-white/10 rounded-2xl
-          opacity-0 transition-opacity duration-700
+          opacity-0 xlg:transition-opacity xlg:duration-700
           xlg:group-hover:opacity-100 xlg:group-focus:opacity-100
         "
       />

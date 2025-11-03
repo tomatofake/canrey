@@ -1,97 +1,130 @@
-'use client'
-import { useEffect, useRef, useState } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+'use client';
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import Header from '@/components/Header/Header'
-import Hero from '@/components/Hero/Hero'
-import Catalog from '@/components/Catalog/Catalog'
-import Features from '@/components/Features/Features'
-import Footer from '@/components/Footer/Footer'
+import Header from '@/components/Header/Header';
+import Hero from '@/components/Hero/Hero';
+import Catalog from '@/components/Catalog/Catalog';
+import Features from '@/components/Features/Features';
+import Footer from '@/components/Footer/Footer';
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
-  const heroInnerRef   = useRef(null)
-  const mainInnerRef   = useRef(null)
-  const footerInnerRef = useRef(null)
-  const heroTopMaskRef = useRef(null)
-
-  const [isNarrow, setIsNarrow] = useState(false)
-
-  useEffect(() => {
-    const mql = window.matchMedia('(max-width: 1080px)')
-    const apply = () => setIsNarrow(mql.matches)
-    apply()
-    mql.addEventListener('change', apply)
-    return () => mql.removeEventListener('change', apply)
-  }, [])
+  const heroInnerRef   = useRef<HTMLDivElement | null>(null);
+  const mainInnerRef   = useRef<HTMLDivElement | null>(null);
+  const footerInnerRef = useRef<HTMLDivElement | null>(null);
+  const heroTopMaskRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) return
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
 
+    ScrollTrigger.config({ ignoreMobileResize: true });
+    gsap.ticker.lagSmoothing(1000, 48);
+
+    const mm = gsap.matchMedia();
     const ctx = gsap.context(() => {
-      gsap.set([heroInnerRef.current, mainInnerRef.current, footerInnerRef.current], {
-        force3D: true,
-        willChange: 'transform'
-      })
-
-      gsap.set(heroInnerRef.current, { yPercent: 0, scale: 1, filter: 'blur(0px)', opacity: 1 })
-      gsap.set(heroTopMaskRef.current, { opacity: 0.06 })
-
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: '#hero-wrapper',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
+      mm.add(
+        {
+          mobile: '(max-width: 1080px)',
+          desktop: '(min-width: 1081px)',
         },
-        defaults: { ease: 'none' }
-      })
-      .to(heroInnerRef.current, {
-        yPercent: -3,
-        scale: 0.995,
-        filter: 'blur(0.3px)',
-        opacity: 0.985
-      }, 0)
-      .to(heroTopMaskRef.current, { opacity: 0.05 }, 0)
+        (ctx) => {
+          const { conditions } = ctx;
+          const isMobile = !!conditions?.mobile;
 
-      const enterOffsetMain = isNarrow ? -120 : -250
-      const startMain = isNarrow ? 'top 90%' : 'top bottom'
-      const endMain   = isNarrow ? 'top 40%' : 'top top'
+          gsap.set([heroInnerRef.current, mainInnerRef.current, footerInnerRef.current], {
+            force3D: true,
+            willChange: 'transform',
+          });
 
-      gsap.set(mainInnerRef.current, { y: enterOffsetMain, opacity: 0.94, filter: 'blur(0.3px)' })
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: '#main-wrapper',
-          start: startMain,
-          end: endMain,
-          scrub: true
-        },
-        defaults: { ease: 'none' }
-      })
-      .to(mainInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
+          gsap.set(heroInnerRef.current, { yPercent: 0, opacity: 1 });
+          gsap.set(heroTopMaskRef.current, { opacity: 0.06 });
 
-      const enterOffsetFooter = 140
-      gsap.set(footerInnerRef.current, { y: enterOffsetFooter, opacity: 0.96, filter: 'blur(0.2px)' })
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: '#footer-wrapper',
-          start: 'top bottom',
-          end: 'top top',
-          scrub: true
-        },
-        defaults: { ease: 'none' }
-      })
-      .to(footerInnerRef.current, { y: 0, opacity: 1, filter: 'blur(0px)' }, 0)
-    })
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: '#hero-wrapper',
+              start: 'top top',
+              end: 'bottom top',
+              scrub: isMobile ? 0.5 : true,
+              fastScrollEnd: true,
+            },
+            defaults: { ease: 'none' },
+          })
+          .to(
+            heroInnerRef.current,
+            isMobile
+              ? { yPercent: -1.2, opacity: 0.99 }
+              : { yPercent: -3, scale: 0.995, filter: 'blur(0.3px)', opacity: 0.985 },
+            0
+          )
+          .to(heroTopMaskRef.current, { opacity: isMobile ? 0.055 : 0.05 }, 0);
 
-    return () => ctx.revert()
-  }, [isNarrow])
+          const enterOffsetMain = isMobile ? -100 : -250;
+          const startMain = isMobile ? 'top 96%' : 'top bottom';
+          const endMain   = isMobile ? 'top 68%' : 'top top';
+
+          gsap.set(mainInnerRef.current, isMobile
+            ? { y: enterOffsetMain, opacity: 0.98 }
+            : { y: enterOffsetMain, opacity: 0.94, filter: 'blur(0.3px)' }
+          );
+
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: '#main-wrapper',
+              start: startMain,
+              end: endMain,
+              scrub: isMobile ? 0.6 : true,
+              fastScrollEnd: true,
+              invalidateOnRefresh: true,
+            },
+            defaults: { ease: 'none' },
+          })
+          .to(mainInnerRef.current, isMobile
+            ? { y: 0, opacity: 1 }
+            : { y: 0, opacity: 1, filter: 'blur(0px)' },
+            0
+          );
+
+          const enterOffsetFooter = isMobile ? 100 : 140;
+          const startFooter = isMobile ? 'top 96%' : 'top bottom';
+          const endFooter   = isMobile ? 'top 70%' : 'top top';
+
+          gsap.set(footerInnerRef.current, isMobile
+            ? { y: enterOffsetFooter, opacity: 0.99 }
+            : { y: enterOffsetFooter, opacity: 0.96, filter: 'blur(0.2px)' }
+          );
+
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: '#footer-wrapper',
+              start: startFooter,
+              end: endFooter,
+              scrub: isMobile ? 0.6 : true,
+              fastScrollEnd: true,
+              invalidateOnRefresh: true,
+            },
+            defaults: { ease: 'none' },
+          })
+          .to(footerInnerRef.current, isMobile
+            ? { y: 0, opacity: 1 }
+            : { y: 0, opacity: 1, filter: 'blur(0px)' },
+            0
+          );
+        }
+      );
+    });
+
+    return () => {
+      ctx.revert();
+      mm.revert();
+    };
+  }, []);
 
   return (
     <>
@@ -128,5 +161,5 @@ export default function Home() {
         </div>
       </section>
     </>
-  )
+  );
 }
