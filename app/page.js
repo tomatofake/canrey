@@ -12,10 +12,10 @@ import Footer from '@/components/Footer/Footer';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
-  const heroInnerRef   = useRef<HTMLDivElement | null>(null);
-  const mainInnerRef   = useRef<HTMLDivElement | null>(null);
-  const footerInnerRef = useRef<HTMLDivElement | null>(null);
-  const heroTopMaskRef = useRef<HTMLDivElement | null>(null);
+  const heroInnerRef   = useRef(null);
+  const mainInnerRef   = useRef(null);
+  const footerInnerRef = useRef(null);
+  const heroTopMaskRef = useRef(null);
 
   useEffect(() => {
     const reduce =
@@ -30,13 +30,9 @@ export default function Home() {
     const mm = gsap.matchMedia();
     const ctx = gsap.context(() => {
       mm.add(
-        {
-          mobile: '(max-width: 1080px)',
-          desktop: '(min-width: 1081px)',
-        },
-        (ctx) => {
-          const { conditions } = ctx;
-          const isMobile = !!conditions?.mobile;
+        { mobile: '(max-width: 1080px)', desktop: '(min-width: 1081px)' },
+        (mctx) => {
+          const isMobile = !!mctx.conditions?.mobile;
 
           gsap.set([heroInnerRef.current, mainInnerRef.current, footerInnerRef.current], {
             force3D: true,
@@ -58,9 +54,8 @@ export default function Home() {
           })
           .to(
             heroInnerRef.current,
-            isMobile
-              ? { yPercent: -1.2, opacity: 0.99 }
-              : { yPercent: -3, scale: 0.995, filter: 'blur(0.3px)', opacity: 0.985 },
+            isMobile ? { yPercent: -1.2, opacity: 0.99 }
+                     : { yPercent: -3, scale: 0.995, filter: 'blur(0.3px)', opacity: 0.985 },
             0
           )
           .to(heroTopMaskRef.current, { opacity: isMobile ? 0.055 : 0.05 }, 0);
@@ -69,9 +64,10 @@ export default function Home() {
           const startMain = isMobile ? 'top 96%' : 'top bottom';
           const endMain   = isMobile ? 'top 68%' : 'top top';
 
-          gsap.set(mainInnerRef.current, isMobile
-            ? { y: enterOffsetMain, opacity: 0.98 }
-            : { y: enterOffsetMain, opacity: 0.94, filter: 'blur(0.3px)' }
+          gsap.set(
+            mainInnerRef.current,
+            isMobile ? { y: enterOffsetMain, opacity: 0.98 }
+                     : { y: enterOffsetMain, opacity: 0.94, filter: 'blur(0.3px)' }
           );
 
           gsap.timeline({
@@ -85,9 +81,10 @@ export default function Home() {
             },
             defaults: { ease: 'none' },
           })
-          .to(mainInnerRef.current, isMobile
-            ? { y: 0, opacity: 1 }
-            : { y: 0, opacity: 1, filter: 'blur(0px)' },
+          .to(
+            mainInnerRef.current,
+            isMobile ? { y: 0, opacity: 1 }
+                     : { y: 0, opacity: 1, filter: 'blur(0px)' },
             0
           );
 
@@ -95,9 +92,10 @@ export default function Home() {
           const startFooter = isMobile ? 'top 96%' : 'top bottom';
           const endFooter   = isMobile ? 'top 70%' : 'top top';
 
-          gsap.set(footerInnerRef.current, isMobile
-            ? { y: enterOffsetFooter, opacity: 0.99 }
-            : { y: enterOffsetFooter, opacity: 0.96, filter: 'blur(0.2px)' }
+          gsap.set(
+            footerInnerRef.current,
+            isMobile ? { y: enterOffsetFooter, opacity: 0.99 }
+                     : { y: enterOffsetFooter, opacity: 0.96, filter: 'blur(0.2px)' }
           );
 
           gsap.timeline({
@@ -111,9 +109,10 @@ export default function Home() {
             },
             defaults: { ease: 'none' },
           })
-          .to(footerInnerRef.current, isMobile
-            ? { y: 0, opacity: 1 }
-            : { y: 0, opacity: 1, filter: 'blur(0px)' },
+          .to(
+            footerInnerRef.current,
+            isMobile ? { y: 0, opacity: 1 }
+                     : { y: 0, opacity: 1, filter: 'blur(0px)' },
             0
           );
         }
@@ -129,7 +128,6 @@ export default function Home() {
   return (
     <>
       <Header />
-
       <main className="bg-[#171718]">
         <section id="hero-wrapper" className="relative">
           <div className="h-[100svh]">
