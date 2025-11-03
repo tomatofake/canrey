@@ -1,25 +1,25 @@
 "use client";
+import { useState, useEffect } from "react";
 import { getData } from "@/app/lib/sanity";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
-import ProductCard from "@/components/ProductCard/ProductCard";
 import BackButton from "@/components/BackButton/BackButton";
 import ProductFilters from "@/components/ProductFilters/ProductFilters";
+import ProductGrid from "@/components/ProductGrid/ProductGrid";
 import { normalizeProducts } from "@/app/lib/normalizeProducts";
-import { useState, useEffect } from "react";
 
-const Ovens = () => {
+export default function Ovens() {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       const raw = await getData("Плити");
       const normalized = normalizeProducts(raw);
       setProducts(normalized);
       setFiltered(normalized);
-    };
-    fetchData();
+    })();
   }, []);
 
   return (
@@ -34,40 +34,30 @@ const Ovens = () => {
         </div>
 
         <div className="xl:flex xl:gap-8">
-          <div className="hidden xl:block">
+          <div className="hidden xlg:block">
             <ProductFilters
               products={products}
+              availableFilters={["size", "color", "ovenType", "surfaceConfiguration"]}
               onFilter={setFiltered}
-              availableFilters={[
-                "size",
-                "color",
-                "ovenType",
-                "surfaceConfiguration"
-              ]}
+              onFilteringChange={setLoading}
             />
           </div>
 
           <div className="flex flex-col xlg:gap-8 xlg:flex-row xl:w-5/6">
-            <div className="xl:hidden">
+            <div className="xlg:hidden">
               <ProductFilters
                 products={products}
+                availableFilters={["size", "color", "ovenType", "surfaceConfiguration"]}
                 onFilter={setFiltered}
-                availableFilters={[
-                  "size",
-                  "color",
-                  "ovenType",
-                  "surfaceConfiguration"
-                ]}
+                onFilteringChange={setLoading}
               />
             </div>
 
-            <ProductCard products={filtered} />
+            <ProductGrid products={filtered} loading={loading}  />
           </div>
         </div>
       </main>
       <Footer />
     </>
   );
-};
-
-export default Ovens;
+}

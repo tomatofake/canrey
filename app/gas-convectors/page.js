@@ -1,25 +1,23 @@
-'use client';
+"use client";
 import { useState, useEffect } from "react";
 import { getData } from "@/app/lib/sanity";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
-import ProductCard from "@/components/ProductCard/ProductCard";
 import BackButton from "@/components/BackButton/BackButton";
 import ProductFilters from "@/components/ProductFilters/ProductFilters";
+import ProductGrid from "@/components/ProductGrid/ProductGrid";
 
-const GasConvectors = () => {
+export default function GasConvectors() {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       const data = await getData("Газові конвектори");
       setProducts(data);
       setFiltered(data);
-      console.log("Loaded products:", data);
-
-    };
-    fetchData();
+    })();
   }, []);
 
   return (
@@ -34,31 +32,30 @@ const GasConvectors = () => {
         </div>
 
         <div className="xl:flex xl:gap-8">
-          <div className="hidden xl:block">
+          <div className="hidden xlg:block">
             <ProductFilters
               products={products}
-              onFilter={setFiltered}
               availableFilters={["power", "heatExchangerMaterial"]}
+              onFilter={setFiltered}
+              onFilteringChange={setLoading}
             />
           </div>
 
           <div className="flex flex-col xlg:gap-8 xlg:flex-row xl:w-5/6">
-            <div className="xl:hidden">
+            <div className="xlg:hidden">
               <ProductFilters
                 products={products}
-                onFilter={setFiltered}
                 availableFilters={["power", "heatExchangerMaterial"]}
+                onFilter={setFiltered}
+                onFilteringChange={setLoading}
               />
             </div>
 
-            <ProductCard products={filtered} />
+            <ProductGrid products={filtered} loading={loading} />
           </div>
         </div>
       </main>
       <Footer />
     </>
   );
-};
-
-export default GasConvectors;
-
+}
