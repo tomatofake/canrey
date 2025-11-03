@@ -15,3 +15,11 @@ button {
     --radius: 0.5rem;
   }
 }
+
+html, body {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+#hero-wrapper, #main-wrapper, #footer-wrapper {
+  contain: paint;
+}

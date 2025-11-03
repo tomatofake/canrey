@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -17,26 +17,21 @@ export default function Home() {
   const footerInnerRef = useRef(null);
   const heroTopMaskRef = useRef(null);
 
-  useEffect(() => {
-    const reduce =
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return;
-
+  useLayoutEffect(() => {
+    ScrollTrigger.normalizeScroll(true);
     ScrollTrigger.config({ ignoreMobileResize: true });
-    gsap.ticker.lagSmoothing(1000, 48);
+    gsap.ticker.lagSmoothing(1000, 16);
 
     const mm = gsap.matchMedia();
     const ctx = gsap.context(() => {
       mm.add(
         { mobile: '(max-width: 1080px)', desktop: '(min-width: 1081px)' },
-        (mctx) => {
-          const isMobile = !!mctx.conditions?.mobile;
+        (m) => {
+          const isMobile = !!m.conditions?.mobile;
 
           gsap.set([heroInnerRef.current, mainInnerRef.current, footerInnerRef.current], {
-            force3D: true,
             willChange: 'transform',
+            force3D: true,
           });
 
           gsap.set(heroInnerRef.current, { yPercent: 0, opacity: 1 });
@@ -47,87 +42,83 @@ export default function Home() {
               trigger: '#hero-wrapper',
               start: 'top top',
               end: 'bottom top',
-              scrub: isMobile ? 0.5 : true,
+              scrub: isMobile ? 0.45 : 0.8,
               fastScrollEnd: true,
             },
             defaults: { ease: 'none' },
           })
           .to(
             heroInnerRef.current,
-            isMobile ? { yPercent: -1.2, opacity: 0.99 }
-                     : { yPercent: -3, scale: 0.995, filter: 'blur(0.3px)', opacity: 0.985 },
+            isMobile
+              ? { yPercent: -1.2, opacity: 0.99 }
+              : { yPercent: -3, scale: 0.995, opacity: 0.985 },
             0
           )
           .to(heroTopMaskRef.current, { opacity: isMobile ? 0.055 : 0.05 }, 0);
 
-          const enterOffsetMain = isMobile ? -100 : -250;
-          const startMain = isMobile ? 'top 96%' : 'top bottom';
-          const endMain   = isMobile ? 'top 68%' : 'top top';
+          const enterYMain   = isMobile ? -90 : -240;
+          const startMain    = isMobile ? 'top 95%' : 'top bottom';
+          const endMain      = isMobile ? 'top 70%' : 'top top';
+          const scrubMain    = isMobile ? 0.55 : 0.9;
 
-          gsap.set(
-            mainInnerRef.current,
-            isMobile ? { y: enterOffsetMain, opacity: 0.98 }
-                     : { y: enterOffsetMain, opacity: 0.94, filter: 'blur(0.3px)' }
-          );
+          gsap.set(mainInnerRef.current, {
+            y: enterYMain,
+            opacity: isMobile ? 0.985 : 0.94,
+          });
 
           gsap.timeline({
             scrollTrigger: {
               trigger: '#main-wrapper',
               start: startMain,
               end: endMain,
-              scrub: isMobile ? 0.6 : true,
+              scrub: scrubMain,
               fastScrollEnd: true,
               invalidateOnRefresh: true,
             },
             defaults: { ease: 'none' },
           })
-          .to(
-            mainInnerRef.current,
-            isMobile ? { y: 0, opacity: 1 }
-                     : { y: 0, opacity: 1, filter: 'blur(0px)' },
-            0
-          );
+          .to(mainInnerRef.current, { y: 0, opacity: 1 }, 0);
 
-          const enterOffsetFooter = isMobile ? 100 : 140;
-          const startFooter = isMobile ? 'top 96%' : 'top bottom';
-          const endFooter   = isMobile ? 'top 70%' : 'top top';
+          const enterYFooter = isMobile ? 90 : 140;
+          const startFooter  = isMobile ? 'top 95%' : 'top bottom';
+          const endFooter    = isMobile ? 'top 72%' : 'top top';
+          const scrubFooter  = isMobile ? 0.5 : 0.85;
 
-          gsap.set(
-            footerInnerRef.current,
-            isMobile ? { y: enterOffsetFooter, opacity: 0.99 }
-                     : { y: enterOffsetFooter, opacity: 0.96, filter: 'blur(0.2px)' }
-          );
+          gsap.set(footerInnerRef.current, {
+            y: enterYFooter,
+            opacity: isMobile ? 0.99 : 0.96,
+          });
 
           gsap.timeline({
             scrollTrigger: {
               trigger: '#footer-wrapper',
               start: startFooter,
               end: endFooter,
-              scrub: isMobile ? 0.6 : true,
+              scrub: scrubFooter,
               fastScrollEnd: true,
               invalidateOnRefresh: true,
             },
             defaults: { ease: 'none' },
           })
-          .to(
-            footerInnerRef.current,
-            isMobile ? { y: 0, opacity: 1 }
-                     : { y: 0, opacity: 1, filter: 'blur(0px)' },
-            0
-          );
+          .to(footerInnerRef.current, { y: 0, opacity: 1 }, 0);
         }
       );
     });
 
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener('load', onLoad);
+
     return () => {
-      ctx.revert();
+      window.removeEventListener('load', onLoad);
       mm.revert();
+      ctx.revert();
     };
   }, []);
 
   return (
     <>
       <Header />
+
       <main className="bg-[#171718]">
         <section id="hero-wrapper" className="relative">
           <div className="h-[100svh]">
