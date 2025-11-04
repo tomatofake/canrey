@@ -23,16 +23,16 @@ export default function EOvens() {
   return (
     <>
       <Header />
-      <main className="min-h-[100vh] max-w-[1920px] mx-auto p-5 xl:px-8 pt-[6%]">
-        <div className="mb-6 flex flex-col xlg:flex-row xlg:items-center xlg:gap-6">
-          <div className="mb-2 xl:mb-0">
+      <main className="min-h-[100vh] max-w-[1920px] mx-auto px-5 xl:px-8 pt-24 md:pt-28">
+        <div className="mb-6 flex flex-col lg:flex-row lg:items-center lg:gap-6">
+          <div className="mb-2 lg:mb-0">
             <BackButton />
           </div>
           <h1 className="text-4xl text-primary font-bold">Електричні духовки</h1>
         </div>
 
-        <div className="xl:flex xl:gap-8">
-          <div className="hidden xlg:block">
+        <div className="flex lg:gap-8">
+          <div className="hidden lg:block">
             <ProductFilters
               products={products}
               availableFilters={["size", "color"]}
@@ -41,8 +41,8 @@ export default function EOvens() {
             />
           </div>
 
-          <div className="flex flex-col xlg:gap-8 xlg:flex-row xl:w-5/6">
-            <div className="xlg:hidden">
+          <div className="flex-1">
+            <div className="lg:hidden mb-4">
               <ProductFilters
                 products={products}
                 availableFilters={["size", "color"]}
