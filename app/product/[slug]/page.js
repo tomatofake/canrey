@@ -1,53 +1,54 @@
+import { notFound } from "next/navigation";
 import { client } from "@/app/lib/sanity";
-import BackButton from "@/components/BackButton/BackButton";
-import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
 import ProductGallery from "@/components/ProductGallery/ProductGallery";
-import { FaArrowLeft } from "react-icons/fa6";
 
-const getData = async (slug) => {
-  const query = `*[_type == 'product' && slug.current == $slug][0] {
-    _id,
-    images,
-    name,
-    description,
-    specs,
-    size,
-    color,
-    'slug': slug.current,
-    'category': categories->{name}
-  }`;
-  return await client.fetch(query, { slug });
-};
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-const ProductDetails = async ({ params }) => {
-  const product = await getData(params.slug);
-  if (!product) return <p className="text-center text-xl py-10">Товар не знайдено</p>;
+async function getProductBySlug(slug) {
+  const query = `
+    *[_type == "product" && slug.current == $slug][0]{
+      _id,
+      name,
+      description,
+      specs,
+      size,
+      color,
+      images,
+      "slug": slug.current,
+      "categories": categories[]->{name}
+    }
+  `;
+  return client.fetch(query, { slug });
+}
+
+export default async function ProductDetails(props) {
+
+  const { slug } = await props.params;
+
+  const product = await getProductBySlug(slug);
+  if (!product) return notFound();
 
   return (
     <>
       <Header />
-      <main className="py-6 xl:py-12 px-10 xl:px-[10%]">
-        <div className="mb-4">
-          <BackButton className="flex items-center gap-2 px-4 py-2 w-fit xl:px-6 xl:py-4">
-            <FaArrowLeft />
-            <span className="text-base xl:text-xl">Назад</span>
-          </BackButton>
-          <h2 className="text-3xl font-bold my-4">{product.name}</h2>
-        </div>
+      <main className="py-6 xl:py-12 px-6 xl:px-[10%] text-primary">
+        <h1 className="text-3xl font-bold mb-6">{product.name}</h1>
 
         <div className="flex flex-col xl:flex-row gap-8">
-          <div className="w-full xl:w-1/2 flex justify-center xl:justify-start">
+          <div className="w-full xl:w-1/2">
             <ProductGallery images={product.images} />
           </div>
 
           <div className="w-full xl:w-1/2">
-            <p className="text-2xl font-semibold mb-2">Характеристики:</p>
-            <ul className="space-y-2 text-xl">
-              <li>Колір: {product.color}</li>
-              <li>Розмір: {product.size}</li>
-              <li>{product.specs}</li>
-              <li>{product.description}</li>
+            <p className="text-2xl font-semibold mb-3">Характеристики:</p>
+            <ul className="space-y-2 text-lg">
+              {product.color && <li><b>Колір:</b> {product.color}</li>}
+              {product.size && <li><b>Розмір:</b> {product.size}</li>}
+              {product.specs && <li>{product.specs}</li>}
+              {product.description && <li>{product.description}</li>}
             </ul>
           </div>
         </div>
@@ -55,6 +56,4 @@ const ProductDetails = async ({ params }) => {
       <Footer />
     </>
   );
-};
-
-export default ProductDetails;
+}

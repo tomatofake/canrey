@@ -34,7 +34,6 @@ export const getData = async (categoryName) => {
       gasType,
       workingArea,
       heatExchangerMaterial,
-      surfaceConfiguration, // ✅ ДОБАВИЛИ ЭТО
       images[]{ asset->{url} },
       "slug": slug.current,
       "categories": categories[]-> { name }
