@@ -1,55 +1,63 @@
-"use client";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { urlFor } from "@/app/lib/sanity";
-import Image from "next/image";
+'use client';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { urlFor } from '@/app/lib/sanity';
+import Image from 'next/image';
 
 const ProductGallery = ({ images }) => {
   if (!images || images.length === 0) return null;
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fade, setFade] = useState(false);
 
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
 
-  const indexToRem = (index) => `${index * 1}rem`;
-
   const nextImage = useCallback(() => {
-    setSelectedIndex((prev) => (prev + 1) % images.length);
+    setFade(true);
+    setTimeout(() => {
+      setSelectedIndex((prev) => (prev + 1) % images.length);
+      setFade(false);
+    }, 200);
   }, [images]);
 
   const prevImage = useCallback(() => {
-    setSelectedIndex((prev) => (prev - 1 + images.length) % images.length);
+    setFade(true);
+    setTimeout(() => {
+      setSelectedIndex((prev) => (prev - 1 + images.length) % images.length);
+      setFade(false);
+    }, 200);
   }, [images]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "ArrowRight") nextImage();
-      if (event.key === "ArrowLeft") prevImage();
-      if (event.key === "Escape") setIsModalOpen(false);
+      if (!isModalOpen) return;
+      if (event.key === 'ArrowRight') nextImage();
+      if (event.key === 'ArrowLeft') prevImage();
+      if (event.key === 'Escape') setIsModalOpen(false);
     };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [nextImage, prevImage, isModalOpen]);
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [nextImage, prevImage]);
+
+  useEffect(() => {
+    document.body.style.overflow = isModalOpen ? 'hidden' : '';
+  }, [isModalOpen]);
 
   const handleTouchStart = (e) => {
     touchStartX.current = e.changedTouches[0].screenX;
   };
-
   const handleTouchEnd = (e) => {
     touchEndX.current = e.changedTouches[0].screenX;
     handleSwipe();
   };
-
   const handleSwipe = () => {
     if (!touchStartX.current || !touchEndX.current) return;
     const distance = touchStartX.current - touchEndX.current;
     const threshold = 50;
-
     if (distance > threshold) nextImage();
     if (distance < -threshold) prevImage();
-
     touchStartX.current = null;
     touchEndX.current = null;
   };
@@ -62,7 +70,7 @@ const ProductGallery = ({ images }) => {
             key={index}
             onClick={() => setSelectedIndex(index)}
             className={`border-2 rounded-md transition ${
-              selectedIndex === index ? "border-blue-500" : "border-gray-300"
+              selectedIndex === index ? 'border-blue-500' : 'border-gray-300'
             }`}
           >
             <Image
@@ -77,7 +85,7 @@ const ProductGallery = ({ images }) => {
       </div>
 
       <div
-        className="border rounded-lg shadow-lg cursor-pointer max-h-[80vh] max-w-[900px] flex items-center justify-center w-full overflow-hidden"
+        className="rounded-lg cursor-pointer max-h-[80vh] max-w-[900px] flex items-center justify-center w-full overflow-hidden"
         onClick={() => setIsModalOpen(true)}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -87,9 +95,12 @@ const ProductGallery = ({ images }) => {
           alt="Вибране фото"
           width={900}
           height={900}
-          className="rounded-lg object-contain max-h-[70vh] w-auto h-auto transition-all duration-300 ease-in-out"
+          className={`rounded-lg object-contain max-h-[70vh] w-auto h-auto transition-opacity duration-300 ease-in-out ${
+            fade ? 'opacity-0' : 'opacity-100'
+          }`}
         />
       </div>
+
 
       <div className="hidden sm:flex xl:hidden justify-between gap-1 mt-4 w-full flex-wrap">
         {images.map((img, index) => (
@@ -97,7 +108,7 @@ const ProductGallery = ({ images }) => {
             key={index}
             onClick={() => setSelectedIndex(index)}
             className={`border-2 p-1 rounded-md transition ${
-              selectedIndex === index ? "border-blue-500" : "border-gray-300"
+              selectedIndex === index ? 'border-blue-500' : 'border-gray-300'
             }`}
           >
             <Image
@@ -111,29 +122,30 @@ const ProductGallery = ({ images }) => {
         ))}
       </div>
 
-      <div className="flex sm:hidden justify-center gap-2 mt-4 relative h-3">
-        {images.map((_, index) => (
-          <div
-            key={index}
-            className="w-2 h-2 rounded-full bg-black opacity-30 transition-all duration-300 ease-in-out"
-          />
-        ))}
-        <div
-          className="w-3 h-3 rounded-full bg-black absolute top-[calc(50%-0.125rem)] left-0 transition-all duration-300 ease-in-out"
-          style={{
-            transform: `translateX(calc(${indexToRem(selectedIndex)} - 0.125rem)) translateY(-50%)`,
-          }}
-        />
-      </div>
-
-
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-white z-[9999]">
           <button
             onClick={prevImage}
-            className="hidden xl:block absolute left-6 text-black text-4xl cursor-pointer z-50"
+            aria-label="Назад"
+            className="
+              absolute z-20 top-1/2 -translate-y-1/2
+              h-11 w-11 rounded-full
+              bg-black/45 backdrop-blur-sm
+              grid place-items-center
+              shadow-sm transition
+              hover:bg-black/60 active:scale-95
+              left-4
+            "
           >
-            ⬅
+            <svg
+              viewBox='0 0 24 24'
+              className='h-5 w-5'
+              fill='none'
+              stroke='white'
+              strokeWidth='2'
+            >
+              <path d='M15 19l-7-7 7-7' />
+            </svg>
           </button>
 
           <div
@@ -146,20 +158,40 @@ const ProductGallery = ({ images }) => {
               alt="Відкрите фото"
               width={1000}
               height={1000}
-              className="object-contain max-h-full max-w-full transition-all duration-300 ease-in-out"
+              className={`object-contain max-h-full max-w-full transition-opacity duration-300 ease-in-out ${
+                fade ? 'opacity-0' : 'opacity-100'
+              }`}
             />
           </div>
 
           <button
             onClick={nextImage}
-            className="hidden xl:block absolute right-6 text-black text-4xl cursor-pointer z-50"
+            aria-label="Далі"
+            className="
+              absolute z-20 top-1/2 -translate-y-1/2
+              h-11 w-11 rounded-full
+              bg-black/45 backdrop-blur-sm
+              grid place-items-center
+              shadow-sm transition
+              hover:bg-black/60 active:scale-95
+              right-4
+            "
           >
-            ➡
+            <svg
+              viewBox='0 0 24 24'
+              className='h-5 w-5'
+              fill='none'
+              stroke='white'
+              strokeWidth='2'
+            >
+              <path d='M9 5l7 7-7 7' />
+            </svg>
           </button>
 
           <button
             onClick={() => setIsModalOpen(false)}
-            className="absolute top-6 right-6 text-black text-4xl cursor-pointer z-50"
+            aria-label="Закрити"
+            className="absolute top-6 right-6 text-black text-4xl cursor-pointer z-50 hover:opacity-70 transition"
           >
             ✖
           </button>
