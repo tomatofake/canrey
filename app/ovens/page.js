@@ -25,7 +25,7 @@ export default function Ovens() {
   return (
     <>
       <Header />
-      <main className="min-h-[100vh] max-w-[1920px] mx-auto px-5 xl:px-8 pt-24 md:pt-28">
+      <main className="min-h-[100vh] max-w-[1920px] mx-auto px-5 xl:px-8 py-24 md:py-28">
         <div className="mb-4 flex flex-col lg:flex-row lg:items-center lg:gap-6">
           <div className="mb-2 lg:mb-0">
             <BackButton />
