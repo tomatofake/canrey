@@ -3,6 +3,7 @@ import { client } from "@/app/lib/sanity";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import ProductGallery from "@/components/ProductGallery/ProductGallery";
+import BackButton from "@/components/BackButton/BackButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -36,6 +37,7 @@ export default async function ProductDetails(props) {
       <Header />
 
       <main className="text-white min-h-screen py-[120px] px-6 md:px-[8%] xl:px-[10%] transition-all">
+        <BackButton className="mb-4"/>
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center md:text-left tracking-tight">
           {product.name}
         </h1>
