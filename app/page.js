@@ -142,7 +142,6 @@ export default function Home() {
     // стабильный рефреш размеров
     const ro = new ResizeObserver(() => { measure(); onScroll(); });
     ro.observe(document.documentElement);
-    ro.observe(document.body);
 
     measure();
     onScroll();
@@ -164,7 +163,7 @@ export default function Home() {
       <main className="bg-[#171718]">
         <section id="hero-wrapper" className="relative">
           <div className="h-[100svh]">
-            <div className="sticky top-0 h-[100svh] z-20 overflow-hidden">
+            <div className="sticky top-0 h-[100svh] z-20 overflow-clip">
               <div className="relative h-full">
                 <div ref={heroInnerRef} className="h-full">
                   <Hero />

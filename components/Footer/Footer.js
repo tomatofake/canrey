@@ -10,7 +10,7 @@ export default function Footer() {
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
   return (
-    <footer className="bg-black/60 text-primary px-5 py-10 md:px-10">
+    <footer className="bg-black/60 text-primary px-5 pt-10 pb-8 md:px-10">
       <div className="flex flex-col xlg:flex-row xlg:items-end xlg:justify-between gap-10">
         <div className="max-w-[600px]">
           <h2 className="text-xl md:text-2xl mb-6 leading-7">
@@ -19,7 +19,7 @@ export default function Footer() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center">
               <FaPhone className="mr-3 text-lg" />
-              <a className="text-lg md:text-xl" href="tel:+380675110148">+380672808555</a>
+              <a className="text-lg md:text-xl" href="tel:+380672808555">+380672808555</a>
             </div>
             <div className="flex items-center">
               <FaEnvelope className="mr-3 text-lg" />
@@ -50,14 +50,15 @@ export default function Footer() {
         </nav>
       </div>
 
-      <div className="mt-10 pt-8 border-t border-white/10">
+      <div className="mt-8 pt-2 border-t border-white/10">
         <div className="flex justify-between items-center">
           <Image
             src="/assets/images/png.png"
-            width={160}
+            width={190}
             height={90}
             alt="Canrey"
-            className="h-auto w-auto"
+            priority
+            className="w-[120px] md:w-[190px] h-auto object-contain"
           />
           <div className="text-white/50 text-center text-sm">
             © 2025 Canrey. Всі права захищені.

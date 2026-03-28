@@ -8,26 +8,32 @@ const ProductGallery = ({ images }) => {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [fade, setFade] = useState(false);
+  
+  // Новое состояние для мягкой анимации
+  const [animating, setAnimating] = useState(false);
 
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
 
-  const nextImage = useCallback(() => {
-    setFade(true);
+  // Единая функция для смены фото с мягким эффектом
+  const handleImageChange = useCallback((updater) => {
+    setAnimating(true); // Запускаем состояние сжатия/полупрозрачности
+    setSelectedIndex(updater); // Моментально меняем индекс картинки
+    
+    // Даем браузеру 30 мс, чтобы применить начальные стили, 
+    // а затем плавно возвращаем картинку в нормальное состояние
     setTimeout(() => {
-      setSelectedIndex((prev) => (prev + 1) % images.length);
-      setFade(false);
-    }, 200);
-  }, [images]);
+      setAnimating(false);
+    }, 30);
+  }, []);
+
+  const nextImage = useCallback(() => {
+    handleImageChange((prev) => (prev + 1) % images.length);
+  }, [handleImageChange, images.length]);
 
   const prevImage = useCallback(() => {
-    setFade(true);
-    setTimeout(() => {
-      setSelectedIndex((prev) => (prev - 1 + images.length) % images.length);
-      setFade(false);
-    }, 200);
-  }, [images]);
+    handleImageChange((prev) => (prev - 1 + images.length) % images.length);
+  }, [handleImageChange, images.length]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -39,7 +45,6 @@ const ProductGallery = ({ images }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextImage, prevImage, isModalOpen]);
-
 
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? 'hidden' : '';
@@ -64,11 +69,12 @@ const ProductGallery = ({ images }) => {
 
   return (
     <div className="flex flex-col xl:flex-row gap-6 justify-center sm:items-start items-center">
+      {/* Миниатюры (десктоп) */}
       <div className="hidden xl:flex xl:flex-col gap-2">
         {images.map((img, index) => (
           <button
             key={index}
-            onClick={() => setSelectedIndex(index)}
+            onClick={() => handleImageChange(index)}
             className={`border-2 rounded-md transition ${
               selectedIndex === index ? 'border-blue-500' : 'border-gray-300'
             }`}
@@ -84,6 +90,7 @@ const ProductGallery = ({ images }) => {
         ))}
       </div>
 
+      {/* Главное фото на странице */}
       <div
         className="rounded-lg cursor-pointer max-h-[80vh] max-w-[900px] flex items-center justify-center w-full overflow-hidden"
         onClick={() => setIsModalOpen(true)}
@@ -95,18 +102,19 @@ const ProductGallery = ({ images }) => {
           alt="Вибране фото"
           width={900}
           height={900}
-          className={`rounded-lg object-contain max-h-[70vh] w-auto h-auto transition-opacity duration-300 ease-in-out ${
-            fade ? 'opacity-0' : 'opacity-100'
+          // Добавили мягкий эффект перехода (opacity-70 и scale-95 -> opacity-100 и scale-100)
+          className={`rounded-lg object-contain max-h-[70vh] w-auto h-auto transition-all duration-300 ease-out ${
+            animating ? 'opacity-70 scale-[0.98]' : 'opacity-100 scale-100'
           }`}
         />
       </div>
 
-
+      {/* Миниатюры (мобилка) */}
       <div className="hidden sm:flex xl:hidden justify-between gap-1 mt-4 w-full flex-wrap">
         {images.map((img, index) => (
           <button
             key={index}
-            onClick={() => setSelectedIndex(index)}
+            onClick={() => handleImageChange(index)}
             className={`border-2 p-1 rounded-md transition ${
               selectedIndex === index ? 'border-blue-500' : 'border-gray-300'
             }`}
@@ -122,6 +130,7 @@ const ProductGallery = ({ images }) => {
         ))}
       </div>
 
+      {/* Модальное окно (полноэкранный режим) */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-white z-[9999]">
           <button
@@ -137,13 +146,7 @@ const ProductGallery = ({ images }) => {
               left-4
             "
           >
-            <svg
-              viewBox='0 0 24 24'
-              className='h-5 w-5'
-              fill='none'
-              stroke='white'
-              strokeWidth='2'
-            >
+            <svg viewBox='0 0 24 24' className='h-5 w-5' fill='none' stroke='white' strokeWidth='2'>
               <path d='M15 19l-7-7 7-7' />
             </svg>
           </button>
@@ -158,8 +161,9 @@ const ProductGallery = ({ images }) => {
               alt="Відкрите фото"
               width={1000}
               height={1000}
-              className={`object-contain max-h-full max-w-full transition-opacity duration-300 ease-in-out ${
-                fade ? 'opacity-0' : 'opacity-100'
+              // Тот же мягкий эффект для полноэкранного режима
+              className={`object-contain max-h-full max-w-full transition-all duration-700 ease-out ${
+                animating ? 'opacity-70' : 'opacity-100 scale-100'
               }`}
             />
           </div>
@@ -177,13 +181,7 @@ const ProductGallery = ({ images }) => {
               right-4
             "
           >
-            <svg
-              viewBox='0 0 24 24'
-              className='h-5 w-5'
-              fill='none'
-              stroke='white'
-              strokeWidth='2'
-            >
+            <svg viewBox='0 0 24 24' className='h-5 w-5' fill='none' stroke='white' strokeWidth='2'>
               <path d='M9 5l7 7-7 7' />
             </svg>
           </button>

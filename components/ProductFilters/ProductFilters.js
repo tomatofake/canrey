@@ -1,4 +1,3 @@
-// components/ProductFilters/ProductFilters.jsx
 "use client";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
@@ -6,12 +5,29 @@ import gsap from "gsap";
 const LABELS = {
   color: "Колір",
   size: "Розмір",
+  volume: "Об'єм",
   power: "Потужність",
-  heatExchangerMaterial: "Матеріал теплообміннику",
+  heatExchangerMaterial: "Матеріал теплообмінника",
   shortSize: "Розмір (Ш×Г)",
   ovenType: "Тип духовки",
   ovenCategory: "Тип плити",
   surfaceConfiguration: "Конфігурація варильної поверхні",
+  workingArea: "Площа обслуговування",
+  installationType: "Тип монтажу",
+  cookingModes: "Режими приготування",
+  innerCoating: "Внутрішнє покриття",
+  gridMaterial: "Матеріал решіток",
+  gasControl: "Газ-контроль",
+  electricIgnitionTop: "Електропіджиг поверхні",
+  electricIgnitionBottom: "Електропіджиг духовки",
+  ovenLighting: "Підсвітка духовки"
+};
+
+// Форматуємо значення для відображення (напр. true -> "Так")
+const formatValue = (val) => {
+  if (val === true) return "Так";
+  if (val === false) return "Ні";
+  return val;
 };
 
 export default function ProductFilters({
@@ -68,8 +84,9 @@ export default function ProductFilters({
     return () => clearTimeout(t);
   }, [selected, products]);
 
+  // Збираємо унікальні значення
   const uniqueValues = (key) =>
-    [...new Set(products.map((p) => p[key]).filter(Boolean))].sort();
+    [...new Set(products.map((p) => p[key]).filter(v => v !== undefined && v !== null && v !== ""))].sort();
 
   const toggleValue = (key, value) => {
     setSelected((prev) => {
@@ -99,61 +116,67 @@ export default function ProductFilters({
 
   return (
     <>
+      {/* ДЕСКТОП */}
       <aside className="hidden xlg:block w-64 shrink-0">
         <div className="rounded-xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/20 backdrop-blur-sm">
           <h2 className="mb-4 text-lg font-semibold text-primary">
             Фільтрувати за:
           </h2>
 
-          {availableFilters.map((key) => (
-            <div key={key} className="mb-5">
-              <h3 className="mb-2 font-medium text-white/90">
-                {LABELS[key] || key}
-              </h3>
+          {availableFilters.map((key) => {
+            const values = uniqueValues(key);
+            if (!values.length) return null; // Не рендеримо порожні фільтри
 
-              <div className="grid grid-cols-1 gap-1 max-h-48 overflow-auto px-1">
-                {uniqueValues(key).map((val) => {
-                  const checked = selected[key]?.includes(val) || false;
-                  return (
-                    <label
-                      key={val}
-                      className="flex items-center gap-3 cursor-pointer select-none pl-0.5"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleValue(key, val)}
-                        className="
-                          peer appearance-none cursor-pointer
-                          h-5 w-5 rounded-md
-                          border border-white/20 bg-black/30
-                          transition-all duration-200
-                          checked:bg-primary checked:border-primary
-                          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
-                        "
-                      />
-                      <span className="-ml-5 grid h-5 w-5 place-items-center rounded-md pointer-events-none">
-                        <svg
-                          viewBox="0 0 24 24"
-                          className="h-3.5 w-3.5 opacity-0 transition-opacity duration-200 peer-checked:opacity-100"
-                        >
-                          <path
-                            d="M5 13l4 4L19 7"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </span>
-                      <span className="text-white/90">{val}</span>
-                    </label>
-                  );
-                })}
+            return (
+              <div key={key} className="mb-5">
+                <h3 className="mb-2 font-medium text-white/90">
+                  {LABELS[key] || key}
+                </h3>
+
+                <div className="grid grid-cols-1 gap-1 max-h-48 overflow-auto px-1 custom-scrollbar">
+                  {values.map((val) => {
+                    const checked = selected[key]?.includes(val) || false;
+                    return (
+                      <label
+                        key={String(val)}
+                        className="flex items-center gap-3 cursor-pointer select-none pl-0.5"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleValue(key, val)}
+                          className="
+                            peer appearance-none cursor-pointer
+                            h-5 w-5 rounded-md
+                            border border-white/20 bg-black/30
+                            transition-all duration-200
+                            checked:bg-primary checked:border-primary
+                            focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
+                          "
+                        />
+                        <span className="-ml-5 grid h-5 w-5 place-items-center rounded-md pointer-events-none">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="h-3.5 w-3.5 opacity-0 transition-opacity duration-200 peer-checked:opacity-100"
+                          >
+                            <path
+                              d="M5 13l4 4L19 7"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                        <span className="text-white/90">{formatValue(val)}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {activeCount > 0 && (
             <button
@@ -166,6 +189,7 @@ export default function ProductFilters({
         </div>
       </aside>
 
+      {/* МОБІЛЬНА ВЕРСІЯ: КНОПКА */}
       <div className="xlg:hidden mb-4">
         <div className="flex items-center justify-between">
           <button
@@ -185,8 +209,9 @@ export default function ProductFilters({
         </div>
       </div>
 
+      {/* МОБІЛЬНЕ МЕНЮ */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 overscroll-none">
+        <div className="fixed inset-0 z-[100] overscroll-none">
           <button
             aria-label="Закрити фільтри"
             onClick={() => {
@@ -215,7 +240,6 @@ export default function ProductFilters({
               paddingRight: "16px",
             }}
           >
-
             <div className="mx-auto w-full max-w-[360px]">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-primary">
@@ -276,7 +300,7 @@ export default function ProductFilters({
                           key={`${k}-${v}`}
                           className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm text-white ring-1 ring-white/15"
                         >
-                          {(LABELS[k] || k) + ": " + v}
+                          {(LABELS[k] || k) + ": " + formatValue(v)}
                           <button
                             onClick={() => removeChip(k, v)}
                             className="opacity-80 hover:opacity-100"
@@ -290,55 +314,60 @@ export default function ProductFilters({
                 </div>
               )}
 
-              {availableFilters.map((key) => (
-                <div key={key} className="mb-5">
-                  <h3 className="mb-2 font-medium text-white/90">
-                    {LABELS[key] || key}
-                  </h3>
+              {availableFilters.map((key) => {
+                const values = uniqueValues(key);
+                if (!values.length) return null;
 
-                  <div className="grid grid-cols-1 gap-2 px-1">
-                    {uniqueValues(key).map((val) => {
-                      const checked = selected[key]?.includes(val) || false;
-                      return (
-                        <label
-                          key={val}
-                          className="flex items-center gap-3 cursor-pointer select-none pl-0.5"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => toggleValue(key, val)}
-                            className="
-                              peer appearance-none cursor-pointer
-                              h-[22px] w-[22px] rounded-md
-                              border border-white/20 bg-black/30
-                              transition-all duration-200
-                              checked:bg-primary
-                              focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
-                            "
-                          />
-                          <span className="-ml-5 grid h-[22px] w-[22px] place-items-center rounded-md pointer-events-none">
-                            <svg
-                              viewBox="0 0 24 24"
-                              className="h-3.5 w-3.5 opacity-0 transition-opacity duration-200 peer-checked:opacity-100"
-                            >
-                              <path
-                                d="M5 13l4 4L19 7"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </span>
-                          <span className="text-white/90">{val}</span>
-                        </label>
-                      );
-                    })}
+                return (
+                  <div key={key} className="mb-5">
+                    <h3 className="mb-2 font-medium text-white/90">
+                      {LABELS[key] || key}
+                    </h3>
+
+                    <div className="grid grid-cols-1 gap-2 px-1">
+                      {values.map((val) => {
+                        const checked = selected[key]?.includes(val) || false;
+                        return (
+                          <label
+                            key={String(val)}
+                            className="flex items-center gap-3 cursor-pointer select-none pl-0.5"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleValue(key, val)}
+                              className="
+                                peer appearance-none cursor-pointer
+                                h-[22px] w-[22px] rounded-md
+                                border border-white/20 bg-black/30
+                                transition-all duration-200
+                                checked:bg-primary
+                                focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
+                              "
+                            />
+                            <span className="-ml-5 grid h-[22px] w-[22px] place-items-center rounded-md pointer-events-none">
+                              <svg
+                                viewBox="0 0 24 24"
+                                className="h-3.5 w-3.5 opacity-0 transition-opacity duration-200 peer-checked:opacity-100"
+                              >
+                                <path
+                                  d="M5 13l4 4L19 7"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="3"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </span>
+                            <span className="text-white/90">{formatValue(val)}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

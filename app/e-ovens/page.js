@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { getData } from "@/app/lib/sanity";
+import { FILTER_CONFIG } from "@/app/lib/filterConfig";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import BackButton from "@/components/BackButton/BackButton";
@@ -35,22 +36,20 @@ export default function EOvens() {
           <div className="hidden lg:block">
             <ProductFilters
               products={products}
-              availableFilters={["size", "color"]}
+              availableFilters={FILTER_CONFIG.eOvens}
               onFilter={setFiltered}
               onFilteringChange={setLoading}
             />
           </div>
-
           <div className="flex-1">
             <div className="lg:hidden mb-4">
               <ProductFilters
                 products={products}
-                availableFilters={["size", "color"]}
+                availableFilters={FILTER_CONFIG.eOvens}
                 onFilter={setFiltered}
                 onFilteringChange={setLoading}
               />
             </div>
-
             <ProductGrid products={filtered} loading={loading} />
           </div>
         </div>

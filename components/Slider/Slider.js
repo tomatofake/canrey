@@ -7,7 +7,7 @@ import { useDrag } from '@use-gesture/react';
 
 const Slider = () => {
   const [slider, setSlider] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const currentIndexRef = useRef(0);
   const containerRef = useRef(null);
   const slidesRef = useRef([]);
   const autoRef = useRef(null);
@@ -15,6 +15,10 @@ const Slider = () => {
   useEffect(() => {
     getSlider().then((data) => setSlider(data));
   }, []);
+
+  const setIndex = (next) => {
+    currentIndexRef.current = next;
+  };
 
   const startAuto = () => {
     stopAuto();
@@ -26,16 +30,16 @@ const Slider = () => {
 
   const handleNext = () => {
     if (!slider?.slides?.length) return;
-    const next = (currentIndex + 1) % slider.slides.length;
-    animateTransition(currentIndex, next, 'right');
-    setCurrentIndex(next);
+    const next = (currentIndexRef.current + 1) % slider.slides.length;
+    animateTransition(currentIndexRef.current, next, 'right');
+    setIndex(next);
   };
 
   const handlePrev = () => {
     if (!slider?.slides?.length) return;
-    const prev = (currentIndex - 1 + slider.slides.length) % slider.slides.length;
-    animateTransition(currentIndex, prev, 'left');
-    setCurrentIndex(prev);
+    const prev = (currentIndexRef.current - 1 + slider.slides.length) % slider.slides.length;
+    animateTransition(currentIndexRef.current, prev, 'left');
+    setIndex(prev);
   };
 
   const animateTransition = (from, to, direction) => {
@@ -157,6 +161,7 @@ const Slider = () => {
               alt={`Slide ${idx + 1}`}
               fill
               priority={idx === 0}
+              loading='eager'
               className="image object-cover"
             />
 

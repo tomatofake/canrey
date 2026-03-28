@@ -20,6 +20,8 @@ export default function GasConvectors() {
     })();
   }, []);
 
+  const filters = ["power", "heatExchangerMaterial", "workingArea", "installationType"];
+
   return (
     <>
       <Header />
@@ -35,7 +37,7 @@ export default function GasConvectors() {
           <div className="hidden lg:block">
             <ProductFilters
               products={products}
-              availableFilters={["power", "heatExchangerMaterial"]}
+              availableFilters={filters}
               onFilter={setFiltered}
               onFilteringChange={setLoading}
             />
@@ -45,7 +47,7 @@ export default function GasConvectors() {
             <div className="lg:hidden mb-4">
               <ProductFilters
                 products={products}
-                availableFilters={["power", "heatExchangerMaterial"]}
+                availableFilters={filters}
                 onFilter={setFiltered}
                 onFilteringChange={setLoading}
               />

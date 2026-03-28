@@ -46,7 +46,7 @@ const BrandSection = ({ imageSrc, imageAlt, children, reverse = false }) => {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reverse]);
+  }, []);
 
   return (
     <section
