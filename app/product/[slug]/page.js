@@ -150,7 +150,7 @@ export default async function ProductDetails(props) {
                     <li key={key}>
                       <b className="text-neutral-300">{label}:</b>{" "}
                       {/* Додаємо 'кг', якщо це вага */}
-                      {key.includes('weight') ? `${product[key]} кг` : product[key]}
+                      {key.includes('weight') ? `${product[key]}` : product[key]}
                     </li>
                   );
                 }
